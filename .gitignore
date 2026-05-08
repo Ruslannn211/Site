@@ -1,0 +1,72 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment files
+.env
+.env.*.local
+
+data/
+uploads/
+
+# Build output
+dist/
+build/
+tmp/
+temp/
+
+# Coverage (тесты)
+coverage/
+.nyc_output/
+
+# IDEs
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Archives
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+*.tgz
+*.xz
+*.bak
+
+# Miscellaneous
+*.log
+*.swp
+*.tmp
+*.orig
+*.cache/
+.cache/
+.eslintcache
+
+# PM2 process file
+pids.json
+dump.pm2
+
+# Optional: lock-файлы, если ты используешь только один пакетный менеджер
+# yarn.lock
+# package-lock.json
+# pnpm-lock.yaml
