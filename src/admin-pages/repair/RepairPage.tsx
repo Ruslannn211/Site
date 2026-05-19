@@ -551,7 +551,7 @@ const StatLabel = styled.div`
 const RepairsList = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 5px;
 `;
 
 const RepairCard = styled.div`

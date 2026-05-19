@@ -525,7 +525,7 @@ const StatLabel = styled.div`
 const OrdersList = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 5px;
 `;
 
 const OrderCard = styled.div`

@@ -1,19 +1,23 @@
-import { type FC, type ReactNode } from 'react';
+import {type FC, type ReactNode, useState} from 'react';
 import styled from "styled-components";
 import TopNav from "./TopNav.tsx";
+import CartModal from "@components/cart/CartModal.tsx";
 
 interface Props {
     children: ReactNode;
 }
 
 const UserLayout: FC<Props> = (props) => {
+    const [cart, setCart] = useState(false);
+
     return (
         <Container>
-            <TopNav />
+            <TopNav openCart={() => setCart(true)} />
 
             <ContentContainer>
                 {props.children}
             </ContentContainer>
+            <CartModal open={cart} onClose={() => setCart(false)} />
         </Container>
     );
 };

@@ -12,7 +12,6 @@ import {
     Wrench,
     FolderTree,
     Globe,
-    Search,
 } from "lucide-react";
 import myIcon from "/logo-transparent3.png";
 import {useNavigate} from "react-router-dom";
@@ -25,6 +24,7 @@ const AdminLayout: FC<Props> = ({
                                     children,
                                 }) => {
     const [collapsed, setCollapsed] = useState(false);
+    const routes = location.pathname.split("/").slice(2);
     const navigate = useNavigate();
 
     return (
@@ -58,7 +58,7 @@ const AdminLayout: FC<Props> = ({
                             Основне
                         </NavTitle>
 
-                        <NavItem active onClick={() => navigate("/control/dashboard")}>
+                        <NavItem active={routes[0] === "dashboard"} onClick={() => navigate("/control/dashboard")}>
                             <LayoutDashboard size={18} />
 
                             {!collapsed && (
@@ -68,7 +68,7 @@ const AdminLayout: FC<Props> = ({
                             )}
                         </NavItem>
 
-                        <NavItem onClick={() => navigate("/control/orders")}>
+                        <NavItem active={routes[0] === "orders"} onClick={() => navigate("/control/orders")}>
                             <ShoppingCart size={18} />
 
                             {!collapsed && (
@@ -78,7 +78,7 @@ const AdminLayout: FC<Props> = ({
                             )}
                         </NavItem>
 
-                        <NavItem onClick={() => navigate("/control/repair")}>
+                        <NavItem active={routes[0] === "repair"} onClick={() => navigate("/control/repair")}>
                             <Wrench size={18} />
 
                             {!collapsed && (
@@ -94,7 +94,7 @@ const AdminLayout: FC<Props> = ({
                             Магазин
                         </NavTitle>
 
-                        <NavItem>
+                        <NavItem active={routes[0] === "products"} onClick={() => navigate("/control/products")}>
                             <Package size={18} />
 
                             {!collapsed && (
@@ -104,17 +104,17 @@ const AdminLayout: FC<Props> = ({
                             )}
                         </NavItem>
 
-                        <NavItem>
+                        <NavItem active={routes[0] === "categories"} onClick={() => navigate("/control/categories")}>
                             <FolderTree size={18} />
 
                             {!collapsed && (
                                 <span>
-                                    Каталоги
+                                    Категорії
                                 </span>
                             )}
                         </NavItem>
 
-                        <NavItem>
+                        <NavItem active={routes[0] === "users"} onClick={() => navigate("/control/users")}>
                             <Users size={18} />
 
                             {!collapsed && (
@@ -441,44 +441,6 @@ const PageTitle = styled.div`
     color: #0f172a;
 
     white-space: nowrap;
-`;
-
-const SearchWrapper = styled.div`
-    width: 340px;
-    height: 44px;
-
-    border-radius: 14px;
-
-    background: #f8fafc;
-
-    border: 1px solid #e2e8f0;
-
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    padding: 0 14px;
-
-    color: #94a3b8;
-
-    box-sizing: border-box;
-`;
-
-const SearchInput = styled.input`
-    flex: 1;
-
-    border: none;
-    outline: none;
-
-    background: transparent;
-
-    font-size: 14px;
-
-    color: #0f172a;
-
-    &::placeholder {
-        color: #94a3b8;
-    }
 `;
 
 const TopRight = styled.div`

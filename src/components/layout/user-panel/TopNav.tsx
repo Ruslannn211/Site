@@ -14,10 +14,10 @@ import {
 import {useNavigate} from "react-router-dom";
 
 interface Props {
-
+    openCart: () => void;
 }
 
-const TopNav: FC<Props> = () => {
+const TopNav: FC<Props> = (props) => {
     const routes = location.pathname.split("/").slice(1);
     const navigate = useNavigate();
 
@@ -86,7 +86,7 @@ const TopNav: FC<Props> = () => {
                         </Badge>
                     </NavIconButton>
 
-                    <NavIconButton>
+                    <NavIconButton onClick={props.openCart}>
                         <ShoppingCart size={19} />
 
                         <Badge>

@@ -20,6 +20,7 @@
     "paths": {
       "@lib/ws": ["lib/ws/WebSocketClient"],
       "@api": ["lib/api"],
+      "@tokens": ["lib/api/tokens"],
       "@types-lib": ["lib/types/index"],
       "@types-lib/events": ["lib/ws/types"],
       "@store": ["store/store"],

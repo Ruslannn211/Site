@@ -5,26 +5,25 @@ import path from "path";
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [react()],
-    /*server: {
-        port: 5173,
-        host: true, // 🔥 разрешает внешний доступ
-        allowedHosts: ["8b44-188-163-97-29.ngrok-free.app"],
-        hmr: {
-            clientPort: 443, // важно для HMR через https (ngrok)
+    server: {
+        proxy: {
+            "/api": {
+                target: "http://127.0.0.1:4081",
+                changeOrigin: true,
+                // если на бэке нет /api в начале, уберем его:
+                rewrite: (path) => path.replace(/^\/api/, ""),
+            },
+            "/ws": {
+                target: "ws://127.0.0.1:4081", // твой тестовый backend
+                changeOrigin: true,
+            },
         },
-        /!*proxy: {
-          "/api": {
-            target: `https://${based_urls.back}`,
-            changeOrigin: true,
-            // если на бэке нет /api в начале, уберем его:
-            rewrite: (path) => path.replace(/^\/api/, ""),
-          },
-        },*!/
-    },*/
+    },
     resolve: {
         alias: {
             "@lib/ws": path.resolve(__dirname, "src/lib/ws/WebSocketClient"),
-            "@api": path.resolve(__dirname, "src/lib/api"),
+            "@api": path.resolve(__dirname, "src/lib/api/index"),
+            "@tokens": path.resolve(__dirname, "src/lib/api/tokens"),
             "@types-lib": path.resolve(__dirname, "src/lib/types/index"),
             "@types-lib/events": path.resolve(__dirname, "src/lib/ws/types"),
             "@store/thunks": path.resolve(__dirname, "src/store"),
