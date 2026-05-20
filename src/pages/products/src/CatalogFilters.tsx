@@ -1,16 +1,7 @@
 import {Search} from "lucide-react";
 import styled from "styled-components";
 import {useMemo, useState} from "react";
-
-const CATEGORIES = [
-    { id: 1, title: "Смартфони та телефони", count: 6366 },
-    { id: 2, title: "Ноутбуки, планшети та комп'ютерна техніка", count: 6664 },
-    { id: 3, title: "Техніка для кухні", count: 3249 },
-    { id: 4, title: "Техніка для дому", count: 1635 },
-    { id: 5, title: "Телевізори та мультимедіа", count: 335 },
-    { id: 6, title: "Смарт-годинники та гаджети", count: 230 },
-    { id: 7, title: "Аудіо, фото та відео", count: 742 },
-];
+import useCategoriesList from "@hooks/useCategoriesList.tsx";
 
 const BRANDS = [
     "Apple",
@@ -23,12 +14,13 @@ const BRANDS = [
 
 export default function CatalogFilters() {
     const [search, setSearch] = useState("");
+    const {list} = useCategoriesList();
 
     const filteredCategories = useMemo(() => {
-        return CATEGORIES.filter(c =>
-            c.title.toLowerCase().includes(search.toLowerCase())
+        return list.filter(c =>
+            c.toLowerCase().includes(search.toLowerCase())
         );
-    }, [search]);
+    }, [search, list]);
 
     return (
         <Wrapper>
@@ -66,18 +58,18 @@ export default function CatalogFilters() {
 
                     <CategoriesList>
                         {filteredCategories.map(category => (
-                            <CategoryItem key={category.id}>
+                            <CategoryItem key={category}>
                                 <CategoryLeft>
                                     <Checkbox />
 
                                     <CategoryInfo>
                                         <CategoryName>
-                                            {category.title}
+                                            {category}
                                         </CategoryName>
 
-                                        <CategoryCount>
+                                        {/*<CategoryCount>
                                             {category.count}
-                                        </CategoryCount>
+                                        </CategoryCount>*/}
                                     </CategoryInfo>
                                 </CategoryLeft>
                             </CategoryItem>
@@ -85,7 +77,7 @@ export default function CatalogFilters() {
                     </CategoriesList>
                 </Section>
 
-                <Section>
+                {/*<Section>
                     <SectionTitle>
                         Бренд
                     </SectionTitle>
@@ -131,7 +123,7 @@ export default function CatalogFilters() {
                             </BrandLeft>
                         </BrandItem>
                     </BrandsList>
-                </Section>
+                </Section>*/}
             </Scroll>
         </Wrapper>
     );

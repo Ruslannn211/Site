@@ -28,6 +28,7 @@
       "@pages/*": ["pages/*"],
       "@admin-pages/*": ["admin-pages/*"],
       "@assets/*": ["assets/*"],
+      "@helpers/*": ["helpers/*"],
       "@components/*": ["components/*"],
       "@hooks/*": ["hooks/*"]
     },

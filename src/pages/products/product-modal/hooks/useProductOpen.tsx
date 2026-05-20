@@ -4,7 +4,7 @@ const useProductOpen = () => {
     const { product } = useParams<{ product: string }>();
 
     return {
-        product: product || null
+        product: product ? Number(product) : null
     };
 };
 

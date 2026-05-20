@@ -29,6 +29,7 @@ export default defineConfig({
             "@store/thunks": path.resolve(__dirname, "src/store"),
             "@store": path.resolve(__dirname, "src/store/store"),
             "@assets": path.resolve(__dirname, "src/assets"),
+            "@helpers": path.resolve(__dirname, "src/helpers"),
             "@pages": path.resolve(__dirname, "src/pages"),
             "@admin-pages": path.resolve(__dirname, "src/admin-pages"),
             "@components": path.resolve(__dirname, "src/components"),

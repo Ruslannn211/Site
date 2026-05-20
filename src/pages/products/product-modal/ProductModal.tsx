@@ -1,4 +1,4 @@
-import {type FC, useEffect, useRef, useState} from "react";
+import {type FC, useEffect} from "react";
 import styled from "styled-components";
 import {
     ArrowLeft,
@@ -8,31 +8,24 @@ import {
     ShoppingCart,
     Star,
     Truck,
-    ChevronLeft,
-    ChevronRight,
 } from "lucide-react";
 import useProductOpen from "@pages/products/product-modal/hooks/useProductOpen.tsx";
 import {useNavigate} from "react-router-dom";
+import useProductOne from "@hooks/useProductOne.tsx";
+import ImagesWrapper from "@pages/products/product-modal/src/ImagesWrapper.tsx";
+import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
+import { buildNumberFormat } from "@helpers/buildNumberFormat";
+import ProductFeatureList from "@pages/products/product-modal/src/ProductFeatureList.tsx";
 
-interface Props {
-
-}
-
-const images = [
-    "https://gstore.ua/content/images/12/950x950l85ml0/apple-macbook-air-13-m3-8512gb-space-gray-mrxp3-33731516750395.jpg",
-    "https://gstore.ua/content/images/12/950x730l85ml0/apple-macbook-air-13-m3-8512gb-space-gray-mrxp3-97403376808474.jpg",
-    "https://gstore.ua/content/images/12/950x730l85ml0/apple-macbook-air-13-m3-8512gb-space-gray-mrxp3-71293849155537.jpg",
-    "https://gstore.ua/content/images/12/950x730l85ml0/apple-macbook-air-13-m3-8512gb-space-gray-mrxp3-50835503081054.jpg",
-    "https://gstore.ua/content/images/12/950x730l85ml0/apple-macbook-air-13-m3-8512gb-space-gray-mrxp3-43680260976899.jpg",
-];
-
-const ProductPage: FC<Props> = () => {
-    const {product} = useProductOpen();
+const ProductPage: FC = () => {
+    const params = useProductOpen();
     const navigate = useNavigate();
+
+    const {product} = useProductOne(params.product);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && product) {
+            if (e.key === "Escape" && params.product) {
                 navigate("/products")
             }
         };
@@ -41,71 +34,10 @@ const ProductPage: FC<Props> = () => {
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [product]);
-
-    const [currentImage, setCurrentImage] = useState(0);
-    const [zoomVisible, setZoomVisible] = useState(false);
-
-    const [zoomPosition, setZoomPosition] = useState({
-        x: 0,
-        y: 0,
-    });
-
-    const [lensPosition, setLensPosition] = useState({
-        x: 0,
-        y: 0,
-    });
-    const imageRef = useRef<HTMLDivElement>(null);
-    const imgRef = useRef<HTMLImageElement>(null);
-
-    const handleMouseMove = (
-        e: React.MouseEvent<HTMLDivElement>
-    ) => {
-        if (!imageRef.current || !imgRef.current) return;
-
-        const wrapperRect =
-            imageRef.current.getBoundingClientRect();
-
-        const imgRect =
-            imgRef.current.getBoundingClientRect();
-
-        // координаты мышки относительно КАРТИНКИ
-        const x = e.clientX - imgRect.left;
-        const y = e.clientY - imgRect.top;
-
-        // если мышка вне картинки
-        if (
-            x < 0 ||
-            y < 0 ||
-            x > imgRect.width ||
-            y > imgRect.height
-        ) {
-            setZoomVisible(false);
-            return;
-        }
-
-        setZoomVisible(true);
-
-        const percentX =
-            (x / imgRect.width) * 100;
-
-        const percentY =
-            (y / imgRect.height) * 100;
-
-        setZoomPosition({
-            x: percentX,
-            y: percentY,
-        });
-
-        // позиция lens относительно wrapper
-        setLensPosition({
-            x: e.clientX - wrapperRect.left,
-            y: e.clientY - wrapperRect.top,
-        });
-    };
+    }, [params.product]);
 
     return (
-        <Container open={!!product}>
+        <Container open={!!params.product}>
             <Content>
                 <TopTabs>
                     <BackButton onClick={() => navigate("/products")}>
@@ -128,215 +60,101 @@ const ProductPage: FC<Props> = () => {
                     </Tabs>
                 </TopTabs>
 
-                <Grid>
-                    <Left>
-                        <ImageWrapper
-                            ref={imageRef}
-                            onMouseEnter={() => setZoomVisible(true)}
-                            onMouseLeave={() => setZoomVisible(false)}
-                            onMouseMove={handleMouseMove}
-                        >
-                            <MainImage
-                                src={images[currentImage]}
-                                ref={imgRef}
-                                alt={"product"}
-                            />
+                {product && (
+                    <Grid>
+                        <ImagesWrapper product={product} />
+                        <Right>
+                            <StatusRow>
+                                <Status>{product.count > 0 ? "Є в наявності" : "-"}</Status>
+                                <Code>Код: {product.code}</Code>
+                            </StatusRow>
 
-                            <ZoomLens
-                                visible={zoomVisible}
-                                style={{
-                                    left: lensPosition.x - 70,
-                                    top: lensPosition.y - 70,
-                                }}
-                            />
+                            <Title>{product.name}</Title>
 
-                            <ImageControls>
-                                <ImageControlButton
-                                    onClick={() =>
-                                        setCurrentImage(prev =>
-                                            prev === 0
-                                                ? images.length - 1
-                                                : prev - 1
-                                        )
-                                    }
-                                >
-                                    <ChevronLeft size={18} />
-                                </ImageControlButton>
+                            {/*<RatingRow>
+                                <Stars>
+                                    <StarFill />
+                                    <StarFill />
+                                    <StarFill />
+                                    <StarFill />
+                                    <StarFill />
+                                </Stars>
 
-                                <ImageControlButton
-                                    onClick={() =>
-                                        setCurrentImage(prev =>
-                                            prev === images.length - 1
-                                                ? 0
-                                                : prev + 1
-                                        )
-                                    }
-                                >
-                                    <ChevronRight size={18} />
-                                </ImageControlButton>
-                            </ImageControls>
-                        </ImageWrapper>
+                                <RatingValue>
+                                    4.9
+                                </RatingValue>
 
-                        <Thumbs>
-                            {images.map((image, index) => (
-                                <Thumb
-                                    key={image}
-                                    active={currentImage === index}
-                                    onClick={() => setCurrentImage(index)}
-                                >
-                                    <ThumbImage
-                                        src={image}
-                                        alt={"thumb"}
-                                    />
-                                </Thumb>
-                            ))}
-                        </Thumbs>
-                    </Left>
+                                <Reviews>
+                                    <MessageCircle size={13} />
 
-                    <Right>
-                        <ZoomContainer visible={zoomVisible}>
-                            <ZoomedImage
-                                style={{
-                                    backgroundImage: `url(${images[currentImage]})`,
-                                    backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                                }}
-                            />
-                        </ZoomContainer>
+                                    284 відгуки
+                                </Reviews>
+                            </RatingRow>*/}
 
-                        <StatusRow>
-                            <Status>
-                                Є в наявності
-                            </Status>
+                            <PriceSection>
+                                {(product.discount ?? 0) > 0 && (
+                                    <OldPrice>
+                                        {buildNumberFormat(product.price)} ₴
+                                    </OldPrice>
+                                )}
 
-                            <Code>
-                                Код: TP-19424
-                            </Code>
-                        </StatusRow>
+                                <PriceRow>
+                                    <CurrentPrice>
+                                        {buildNumberFormat(buildProducrPrice(product))} ₴
+                                    </CurrentPrice>
 
-                        <Title>
-                            Apple MacBook Air 13 M3 16GB 512GB Space Gray
-                        </Title>
+                                    {(product.discount ?? 0) > 0 && (
+                                        <Discount>
+                                            -{product.discount}%
+                                        </Discount>
+                                    )}
+                                </PriceRow>
+                            </PriceSection>
 
-                        <RatingRow>
-                            <Stars>
-                                <StarFill />
-                                <StarFill />
-                                <StarFill />
-                                <StarFill />
-                                <StarFill />
-                            </Stars>
+                            {!!product.description && (
+                                <Description>
+                                    {product.description}
+                                </Description>
+                            )}
 
-                            <RatingValue>
-                                4.9
-                            </RatingValue>
+                            <ProductFeatureList product={product} />
 
-                            <Reviews>
-                                <MessageCircle size={13} />
+                            <ButtonsRow>
+                                <BuyButton>
+                                    <ShoppingCart size={18} />
 
-                                284 відгуки
-                            </Reviews>
-                        </RatingRow>
+                                    Замовити товар
+                                </BuyButton>
 
-                        <PriceSection>
-                            <OldPrice>
-                                68 999 ₴
-                            </OldPrice>
+                                <FavoriteButton>
+                                    <Heart size={18} />
+                                </FavoriteButton>
+                            </ButtonsRow>
 
-                            <PriceRow>
-                                <CurrentPrice>
-                                    62 999 ₴
-                                </CurrentPrice>
+                            <Advantages>
+                                <Advantage>
+                                    <AdvantageIcon>
+                                        <Truck size={16} />
+                                    </AdvantageIcon>
 
-                                <Discount>
-                                    -9%
-                                </Discount>
-                            </PriceRow>
-                        </PriceSection>
+                                    <AdvantageText>
+                                        Безкоштовна доставка
+                                    </AdvantageText>
+                                </Advantage>
 
-                        <Description>
-                            Потужний ноутбук на базі Apple M3 для роботи,
-                            навчання та професійних задач. Висока
-                            автономність, преміальний дисплей та безшумна
-                            система охолодження.
-                        </Description>
+                                <Advantage>
+                                    <AdvantageIcon>
+                                        <ShieldCheck size={16} />
+                                    </AdvantageIcon>
 
-                        <Characteristics>
-                            <Characteristic>
-                                <Label>
-                                    Дисплей
-                                </Label>
-
-                                <Value>
-                                    13.6" Liquid Retina
-                                </Value>
-                            </Characteristic>
-
-                            <Characteristic>
-                                <Label>
-                                    Процесор
-                                </Label>
-
-                                <Value>
-                                    Apple M3
-                                </Value>
-                            </Characteristic>
-
-                            <Characteristic>
-                                <Label>
-                                    Оперативна памʼять
-                                </Label>
-
-                                <Value>
-                                    16 GB
-                                </Value>
-                            </Characteristic>
-
-                            <Characteristic>
-                                <Label>
-                                    Накопичувач
-                                </Label>
-
-                                <Value>
-                                    SSD 512 GB
-                                </Value>
-                            </Characteristic>
-                        </Characteristics>
-
-                        <ButtonsRow>
-                            <BuyButton>
-                                <ShoppingCart size={18} />
-
-                                Замовити товар
-                            </BuyButton>
-
-                            <FavoriteButton>
-                                <Heart size={18} />
-                            </FavoriteButton>
-                        </ButtonsRow>
-
-                        <Advantages>
-                            <Advantage>
-                                <AdvantageIcon>
-                                    <Truck size={16} />
-                                </AdvantageIcon>
-
-                                <AdvantageText>
-                                    Безкоштовна доставка
-                                </AdvantageText>
-                            </Advantage>
-
-                            <Advantage>
-                                <AdvantageIcon>
-                                    <ShieldCheck size={16} />
-                                </AdvantageIcon>
-
-                                <AdvantageText>
-                                    Гарантія 12 місяців
-                                </AdvantageText>
-                            </Advantage>
-                        </Advantages>
-                    </Right>
-                </Grid>
+                                    <AdvantageText>
+                                        Гарантія 12 місяців
+                                    </AdvantageText>
+                                </Advantage>
+                            </Advantages>
+                        </Right>
+                    </Grid>
+                )}
             </Content>
         </Container>
     );
@@ -496,6 +314,7 @@ const Tab = styled.button<{ active?: boolean }>`
 `;
 
 const Grid = styled.div`
+    position: relative;
     display: grid;
 
     grid-template-columns: 480px 1fr;
@@ -503,188 +322,6 @@ const Grid = styled.div`
     gap: 18px;
 
     align-items: start;
-`;
-
-const Left = styled.div`
-    position: sticky;
-    top: 16px;
-`;
-
-const ImageWrapper = styled.div`
-    position: relative;
-    aspect-ratio: 1 / 1;
-
-    width: 100%;
-
-    border-radius: 14px;
-
-    background: white;
-
-    border: 1px solid #e2e8f0;
-
-    overflow: hidden;
-
-    box-shadow:
-            0 6px 20px rgba(15,23,42,0.04);
-`;
-
-const MainImage = styled.img`
-    width: 100%;
-    height: 100%;
-
-    object-fit: contain;
-
-    padding: 24px;
-
-    box-sizing: border-box;
-    pointer-events: none;
-`;
-
-const ImageControls = styled.div`
-    position: absolute;
-
-    left: 14px;
-    right: 14px;
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    display: flex;
-    justify-content: space-between;
-`;
-
-const ImageControlButton = styled.button`
-    width: 38px;
-    height: 38px;
-
-    border: none;
-    border-radius: 10px;
-
-    background: rgba(255,255,255,0.94);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-
-    color: #0f172a;
-
-    box-shadow:
-            0 8px 18px rgba(15,23,42,0.10);
-`;
-
-const Thumbs = styled.div`
-    display: flex;
-    gap: 10px;
-
-    margin-top: 12px;
-`;
-
-const Thumb = styled.button<{ active: boolean }>`
-    width: 74px;
-    height: 74px;
-
-    border-radius: 12px;
-
-    overflow: hidden;
-
-    padding: 0;
-
-    background: white;
-
-    border: 2px solid ${({ active }) =>
-    active ? "#111827" : "#e2e8f0"};
-
-    cursor: pointer;
-
-    transition: 0.16s ease;
-
-    &:hover {
-        border-color: #94a3b8;
-    }
-`;
-
-const ThumbImage = styled.img`
-    width: 100%;
-    height: 100%;
-
-    object-fit: contain;
-
-    padding: 8px;
-
-    box-sizing: border-box;
-`;
-
-const ZoomLens = styled.div<{ visible: boolean }>`
-    position: absolute;
-
-    width: 140px;
-    height: 140px;
-
-    border-radius: 14px;
-
-    background: rgba(255,255,255,0.22);
-
-    border: 1px solid rgba(255,255,255,0.7);
-
-    backdrop-filter: blur(2px);
-
-    pointer-events: none;
-
-    opacity: ${({ visible }) =>
-    visible ? 1 : 0};
-
-    transition: opacity 0.12s ease;
-
-    z-index: 4;
-
-    box-shadow:
-            0 8px 20px rgba(15,23,42,0.10);
-`;
-
-const ZoomContainer = styled.div<{ visible: boolean }>`
-    position: absolute;
-
-    top: 22px;
-    left: 22px;
-    width: calc(100% - 44px);
-
-    height: calc(100% - 44px);
-
-    max-height: calc(100vw - 44px);
-
-    aspect-ratio: 1 / 1;
-    
-    overflow: hidden;
-
-    background: white;
-
-    border-radius: 14px;
-
-    z-index: ${({ visible }) =>
-            visible ? 1 : -1};
-
-    opacity: ${({ visible }) =>
-            visible ? 1 : 0};
-
-    transition: opacity 100ms ease;
-
-    box-sizing: border-box;
-`;
-
-const ZoomedImage = styled.div`
-    width: 100%;
-    height: 100%;
-
-    background-repeat: no-repeat;
-
-    background-size: 180%;
-
-    will-change: background-position;
-
-    transition:
-            background-position 0.03s linear;
 `;
 
 const Right = styled.div`
