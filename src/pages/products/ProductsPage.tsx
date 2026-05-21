@@ -1,4 +1,4 @@
-import {type FC} from "react";
+import {type FC, useState} from "react";
 import styled from "styled-components";
 import {
     ChevronLeft,
@@ -6,24 +6,27 @@ import {
 } from "lucide-react";
 import CatalogFilters from "./src/CatalogFilters.tsx";
 import ProductModal from "./product-modal/ProductModal.tsx";
-import useProductsList from "@hooks/useProductsList.tsx";
+import useProductsList, {type ProductsFiltersType} from "@hooks/useProductsList.tsx";
 import ProductItem from "@pages/products/src/ProductItem.tsx";
 
 const ProductsPage: FC = () => {
-    const {list} = useProductsList();
+    const [filters, setFilters] = useState<ProductsFiltersType>({
+        start_price: null, end_price: null, ids: [], categories: []
+    });
+    const {list} = useProductsList(filters);
 
     return (
         <Container>
-            <CatalogFilters />
+            <CatalogFilters filtersState={[filters, setFilters]} />
 
             <Content>
                 <TopBlock>
                     <BlockTitle>
-                        Товари спеціально для вас
+                        Усі товари магазину
                     </BlockTitle>
 
                     <BlockDescription>
-                        Популярні товари та найкращі пропозиції магазину
+                        Обирайте категорії, використовуйте фільтри та знаходьте потрібні товари для себе
                     </BlockDescription>
                 </TopBlock>
 

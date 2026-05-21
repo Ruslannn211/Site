@@ -6,12 +6,12 @@ import {
     Search,
     ShoppingCart,
     Heart,
-    Menu,
     User,
     Wrench,
     Package, ShieldCheck,
 } from "lucide-react";
 import {useNavigate} from "react-router-dom";
+import useCart from "@hooks/useCart.tsx";
 
 interface Props {
     openCart: () => void;
@@ -25,14 +25,12 @@ const TopNav: FC<Props> = (props) => {
         navigate("/" + new_type);
     }
 
+    const cart = useCart();
+
     return (
         <Container>
             <Content>
                 <Left>
-                    <MenuButton>
-                        <Menu size={20} />
-                    </MenuButton>
-
                     <LogoWrapper>
                         <Logo src={myIcon} alt={"TechPanda"} />
                     </LogoWrapper>
@@ -47,7 +45,7 @@ const TopNav: FC<Props> = (props) => {
 
                     <ModeSwitcher>
                         <ModeButton
-                            active={routes[0] === "products"}
+                            $active={routes[0] === "products"}
                             onClick={() => handleViewType("products")}
                         >
                             <Package size={15} />
@@ -56,7 +54,7 @@ const TopNav: FC<Props> = (props) => {
                         </ModeButton>
 
                         <ModeButton
-                            active={routes[0] === "repair"}
+                            $active={routes[0] === "repair"}
                             onClick={() => handleViewType("repair")}
                         >
                             <Wrench size={15} />
@@ -89,9 +87,11 @@ const TopNav: FC<Props> = (props) => {
                     <NavIconButton onClick={props.openCart}>
                         <ShoppingCart size={19} />
 
-                        <Badge>
-                            3
-                        </Badge>
+                        {cart.cart.length > 0 && (
+                            <Badge>
+                                {cart.cart.length}
+                            </Badge>
+                        )}
                     </NavIconButton>
 
                     <ProfileButton>
@@ -161,43 +161,6 @@ const Left = styled.div`
     gap: 12px;
 
     flex-shrink: 0;
-`;
-
-const MenuButton = styled.button`
-    width: 40px;
-    height: 40px;
-
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-
-    background:
-            linear-gradient(
-                    180deg,
-                    #ffffff 0%,
-                    #f8fafc 100%
-            );
-
-    color: #0f172a;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-
-    transition: 0.18s ease;
-
-    box-shadow:
-            0 4px 10px rgba(15,23,42,0.04);
-
-    &:hover {
-        transform: translateY(-1px);
-
-        border-color: #cbd5e1;
-
-        box-shadow:
-                0 10px 18px rgba(15,23,42,0.08);
-    }
 `;
 
 const LogoWrapper = styled.div`
@@ -283,7 +246,7 @@ const ModeSwitcher = styled.div`
     box-sizing: border-box;
 `;
 
-const ModeButton = styled.button<{ active: boolean }>`
+const ModeButton = styled.button<{ $active: boolean }>`
     height: 100%;
 
     padding: 0 16px;
@@ -291,13 +254,13 @@ const ModeButton = styled.button<{ active: boolean }>`
     border: none;
     border-radius: 9px;
 
-    background: ${({ active }) =>
-            active
+    background: ${({ $active }) =>
+            $active
                     ? "linear-gradient(135deg,#111827 0%,#1e293b 100%)"
                     : "transparent"};
 
-    color: ${({ active }) =>
-            active ? "white" : "#475569"};
+    color: ${({ $active }) =>
+            $active ? "white" : "#475569"};
 
     display: flex;
     align-items: center;
@@ -310,14 +273,14 @@ const ModeButton = styled.button<{ active: boolean }>`
 
     transition: 0.18s ease;
 
-    box-shadow: ${({ active }) =>
-            active
+    box-shadow: ${({ $active }) =>
+            $active
                     ? "0 6px 14px rgba(15,23,42,0.16)"
                     : "none"};
 
     &:hover {
-        color: ${({ active }) =>
-                active ? "white" : "#0f172a"};
+        color: ${({ $active }) =>
+                $active ? "white" : "#0f172a"};
     }
 `;
 

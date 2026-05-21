@@ -9,6 +9,9 @@ import {
 import {useNavigate} from "react-router-dom";
 import type {ProductListType} from "@types-lib";
 import useProductImage from "@hooks/useProductImage.tsx";
+import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
+import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
+import useCart from "@hooks/useCart.tsx";
 
 interface Props {
     product: ProductListType;
@@ -19,6 +22,7 @@ const ProductItem: FC<Props> = (props) => {
     const navigate = useNavigate();
 
     const image = useProductImage(product.previewImage);
+    const cart = useCart();
 
     return (
         <ProductCard key={product.id} onClick={() => navigate(`/products/` + String(product.id))}>
@@ -67,29 +71,34 @@ const ProductItem: FC<Props> = (props) => {
 
                 <PriceBlock>
                     <PriceRow>
-                        <CurrentPrice
-                            discount={!!product.discount && product.discount > 0}
-                        >
-                            {product.price.toLocaleString()} ₴
+                        <CurrentPrice $discount={!!product.discount && product.discount > 0}>
+                            {buildNumberFormat(buildProducrPrice(product))} ₴
                         </CurrentPrice>
 
-                        <CartButton>
+                        <CartButton $disabled={cart.isInCart(product.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        cart.addToCart(product.id);
+                                    }}
+                        >
                             <ShoppingCart size={16} />
                         </CartButton>
                     </PriceRow>
 
-                    {/*{product.oldPrice && (
+                    {(product.discount ?? 0) > 0 && (
                         <OldPrice>
-                            {product.oldPrice.toLocaleString()} ₴
+                            {buildNumberFormat(product.price)} ₴
                         </OldPrice>
-                    )}*/}
+                    )}
                 </PriceBlock>
 
-                <DeliveryContainer>
-                    <Delivery>
-                        Безкоштовна доставка
-                    </Delivery>
-                </DeliveryContainer>
+                {product.delivery === "free" && (
+                    <DeliveryContainer>
+                        <Delivery>
+                            Безкоштовна доставка
+                        </Delivery>
+                    </DeliveryContainer>
+                )}
             </ProductInfo>
         </ProductCard>
     );
@@ -325,17 +334,17 @@ const PriceRow = styled.div`
     gap: 10px;
 `;
 
-const CurrentPrice = styled.div<{ discount: boolean }>`
+const CurrentPrice = styled.div<{ $discount: boolean }>`
     font-size: 28px;
     font-weight: 900;
 
     letter-spacing: -0.04em;
 
-    color: ${({discount}) =>
-    discount ? "#ef4444" : "#0f172a"};
+    color: ${({$discount}) =>
+    $discount ? "#ef4444" : "#0f172a"};
 `;
 
-const CartButton = styled.button`
+const CartButton = styled.button<{$disabled?: boolean}>`
     width: 40px;
     height: 40px;
 
@@ -367,6 +376,20 @@ const CartButton = styled.button`
     &:hover {
         transform: translateY(-1px);
     }
+
+    ${p => p.$disabled && `
+        box-shadow: 0 10px 22px rgba(166, 208, 181, 0.22);
+        background: linear-gradient(
+            135deg,
+            #909893 0%,
+            #bfc9c4 100%
+        );
+        
+        cursor: default;
+        &:hover {
+            transform: none;
+        }
+    `}
 `;
 
 const DeliveryContainer = styled.div`

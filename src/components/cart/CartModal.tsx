@@ -1,50 +1,37 @@
-import {type FC} from "react";
+import {type FC, useMemo} from "react";
 import styled from "styled-components";
-import {
-    Minus,
-    Plus,
-    ShoppingBag,
-    Trash2,
-    X,
-} from "lucide-react";
+import {ShoppingBag, X,} from "lucide-react";
 import {useNavigate} from "react-router-dom";
+import useCart from "@hooks/useCart.tsx";
+import useProductsList from "@hooks/useProductsList.tsx";
+import CartProduct from "@components/cart/src/CartProduct.tsx";
+import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
+import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
 
 interface Props {
     open: boolean;
-    onClose?: () => void;
+    onClose: () => void;
 }
 
-const PRODUCTS = [
-    {
-        id: 1,
-        title: "iPhone 15 Pro Max 256GB",
-        image:
-            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200&auto=format&fit=crop",
-        price: 62999,
-        count: 1,
-    },
-
-    {
-        id: 2,
-        title: "AirPods Pro 2 USB-C",
-        image:
-            "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?q=80&w=1200&auto=format&fit=crop",
-        price: 10999,
-        count: 2,
-    },
-];
-
-const CartModal: FC<Props> = ({
-                                  open,
-                                  onClose,
-                              }) => {
-    const total = PRODUCTS.reduce(
-        (acc, product) =>
-            acc +
-            product.price * product.count,
-        0
-    );
+const CartModal: FC<Props> = (props) => {
+    const {open, onClose,} = props;
     const navigate = useNavigate();
+    const cart = useCart();
+
+    const filters = useMemo(
+        () => ({ids: cart.cartIds}),
+        [cart.cartIds]
+    );
+
+    const {list} = useProductsList(filters);
+
+    const totalPrice = useMemo(
+        () => list.reduce(
+            (sum, i) => (
+                sum + (buildProducrPrice(i) * cart.getCartCount(i.id))
+            ), 0),
+        [cart, list]
+    );
 
     return (
         <Overlay open={open}>
@@ -52,90 +39,26 @@ const CartModal: FC<Props> = ({
                 <Header>
                     <HeaderLeft>
                         <HeaderIcon>
-                            <ShoppingBag size={18} />
+                            <ShoppingBag size={18}/>
                         </HeaderIcon>
 
                         <HeaderInfo>
-                            <Title>
-                                Кошик
-                            </Title>
-
+                            <Title>Кошик</Title>
                             <Description>
-                                {PRODUCTS.length} товарів
-                                у кошику
+                                {cart.cart.length} товарів у кошику
                             </Description>
                         </HeaderInfo>
                     </HeaderLeft>
 
-                    <CloseButton
-                        onClick={onClose}
-                    >
-                        <X size={18} />
+                    <CloseButton onClick={onClose}>
+                        <X size={18}/>
                     </CloseButton>
                 </Header>
 
                 <Content>
                     <Products>
-                        {PRODUCTS.map(product => (
-                            <ProductCard
-                                key={product.id}
-                            >
-                                <ProductImage
-                                    src={
-                                        product.image
-                                    }
-                                    alt={
-                                        product.title
-                                    }
-                                />
-
-                                <ProductInfo>
-                                    <ProductTitle>
-                                        {
-                                            product.title
-                                        }
-                                    </ProductTitle>
-
-                                    <Controls>
-                                        <FlexContainer>
-                                            <CountControls>
-                                                <CountButton>
-                                                    <Minus
-                                                        size={
-                                                            14
-                                                        }
-                                                    />
-                                                </CountButton>
-
-                                                <Count>
-                                                    {
-                                                        product.count
-                                                    }
-                                                </Count>
-
-                                                <CountButton>
-                                                    <Plus
-                                                        size={
-                                                            14
-                                                        }
-                                                    />
-                                                </CountButton>
-                                            </CountControls>
-                                            <ProductPrice>
-                                                {product.price.toLocaleString()} ₴
-                                            </ProductPrice>
-                                        </FlexContainer>
-
-                                        <DeleteButton>
-                                            <Trash2
-                                                size={
-                                                    15
-                                                }
-                                            />
-                                        </DeleteButton>
-                                    </Controls>
-                                </ProductInfo>
-                            </ProductCard>
+                        {cart.cart.length > 0 && list.map(product => (
+                            <CartProduct product={product} key={product.id}/>
                         ))}
                     </Products>
 
@@ -146,21 +69,24 @@ const CartModal: FC<Props> = ({
                             </SummaryLabel>
 
                             <SummaryPrice>
-                                {total.toLocaleString()} ₴
+                                {buildNumberFormat(totalPrice)} ₴
                             </SummaryPrice>
                         </Summary>
 
                         <Buttons>
-                            <ClearButton>
+                            <ClearButton onClick={() => {
+                                onClose();
+                                cart.clearCart();
+                            }}>
                                 Очистити
                             </ClearButton>
 
                             <CheckoutButton onClick={() => {
-                                if (onClose) onClose();
+                                if (cart.cart.length === 0) return;
+                                onClose();
                                 navigate("/checkout");
-                            }}>
-                                Оформити
-                                замовлення
+                            }} $disabled={cart.cart.length === 0} >
+                                Оформити замовлення
                             </CheckoutButton>
                         </Buttons>
                     </Footer>
@@ -182,14 +108,14 @@ const Overlay = styled.div<{ open: boolean }>`
     display: flex;
     justify-content: flex-end;
 
-    background: rgba(15,23,42,0.32);
+    background: rgba(15, 23, 42, 0.32);
 
     backdrop-filter: blur(5px);
 
-    opacity: ${({ open }) => open ? 1 : 0};
+    opacity: ${({open}) => open ? 1 : 0};
 
-    pointer-events: ${({ open }) =>
-    open ? "all" : "none"};
+    pointer-events: ${({open}) =>
+            open ? "all" : "none"};
 
     transition: 0.18s ease;
 `;
@@ -207,8 +133,7 @@ const Modal = styled.div`
     display: flex;
     flex-direction: column;
 
-    box-shadow:
-            -20px 0 40px rgba(15,23,42,0.12);
+    box-shadow: -20px 0 40px rgba(15, 23, 42, 0.12);
 
     animation: slideIn 0.22s ease;
 
@@ -249,12 +174,11 @@ const HeaderIcon = styled.div`
 
     border-radius: 16px;
 
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
+    background: linear-gradient(
+            135deg,
+            #16a34a 0%,
+            #22c55e 100%
+    );
 
     color: white;
 
@@ -262,8 +186,7 @@ const HeaderIcon = styled.div`
     align-items: center;
     justify-content: center;
 
-    box-shadow:
-            0 12px 24px rgba(34,197,94,0.20);
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.20);
 `;
 
 const HeaderInfo = styled.div`
@@ -328,131 +251,6 @@ const Products = styled.div`
     box-sizing: border-box;
 `;
 
-const ProductCard = styled.div`
-    display: flex;
-    gap: 16px;
-
-    padding: 14px;
-
-    border-radius: 8px;
-
-    background: #f8fafc;
-
-    border: 1px solid #edf2f7;
-`;
-
-const ProductImage = styled.img`
-    width: 70px;
-    height: 70px;
-
-    border-radius: 18px;
-
-    object-fit: cover;
-
-    background: white;
-`;
-
-const ProductInfo = styled.div`
-    flex: 1;
-
-    display: flex;
-    flex-direction: column;
-`;
-
-const ProductTitle = styled.div`
-    font-size: 15px;
-    font-weight: 800;
-
-    line-height: 1.5;
-
-    color: #0f172a;
-`;
-
-const ProductPrice = styled.div`
-
-    font-size: 24px;
-    font-weight: 900;
-
-    letter-spacing: -0.05em;
-
-    color: #16a34a;
-`;
-
-const Controls = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-`;
-
-const FlexContainer = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 5px;
-`;
-
-const CountControls = styled.div`
-    height: 42px;
-
-    padding: 0 10px;
-
-    border-radius: 14px;
-
-    background: white;
-
-    border: 1px solid #e2e8f0;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-`;
-
-const CountButton = styled.button`
-    width: 26px;
-    height: 26px;
-
-    border-radius: 8px;
-
-    border: none;
-
-    background: #f1f5f9;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-`;
-
-const Count = styled.div`
-    min-width: 24px;
-
-    text-align: center;
-
-    font-size: 14px;
-    font-weight: 800;
-
-    color: #0f172a;
-`;
-
-const DeleteButton = styled.button`
-    width: 42px;
-    height: 42px;
-
-    border-radius: 14px;
-
-    border: none;
-
-    background: rgba(239,68,68,0.10);
-
-    color: #ef4444;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-`;
-
 const Footer = styled.div`
     padding: 22px;
 
@@ -511,7 +309,7 @@ const ClearButton = styled.button`
     cursor: pointer;
 `;
 
-const CheckoutButton = styled.button`
+const CheckoutButton = styled.button<{$disabled?: boolean}>`
     flex: 2;
 
     height: 52px;
@@ -519,12 +317,11 @@ const CheckoutButton = styled.button`
     border: none;
     border-radius: 16px;
 
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
+    background: linear-gradient(
+            135deg,
+            #16a34a 0%,
+            #22c55e 100%
+    );
 
     color: white;
 
@@ -533,6 +330,19 @@ const CheckoutButton = styled.button`
 
     cursor: pointer;
 
-    box-shadow:
-            0 14px 28px rgba(34,197,94,0.22);
+    box-shadow: 0 14px 28px rgba(34, 197, 94, 0.22);
+    
+    ${p => p.$disabled && `
+        box-shadow: 0 10px 22px rgba(166, 208, 181, 0.22);
+        background: linear-gradient(
+            135deg,
+            #909893 0%,
+            #bfc9c4 100%
+        );
+        
+        cursor: default;
+        &:hover {
+            transform: none;
+        }
+    `}
 `;

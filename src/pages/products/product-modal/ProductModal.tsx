@@ -16,12 +16,15 @@ import ImagesWrapper from "@pages/products/product-modal/src/ImagesWrapper.tsx";
 import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
 import { buildNumberFormat } from "@helpers/buildNumberFormat";
 import ProductFeatureList from "@pages/products/product-modal/src/ProductFeatureList.tsx";
+import useCart from "@hooks/useCart.tsx";
 
 const ProductPage: FC = () => {
     const params = useProductOpen();
     const navigate = useNavigate();
 
     const {product} = useProductOne(params.product);
+    const cart = useCart();
+    const inCart = product ? cart.isInCart(product.id) : false;
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -120,10 +123,10 @@ const ProductPage: FC = () => {
                             <ProductFeatureList product={product} />
 
                             <ButtonsRow>
-                                <BuyButton>
+                                <BuyButton $disabled={inCart} onClick={() => !inCart && cart.addToCart(product.id)}>
                                     <ShoppingCart size={18} />
 
-                                    Замовити товар
+                                    {inCart ? "Вже у кошику" : "Додати до кошику"}
                                 </BuyButton>
 
                                 <FavoriteButton>
@@ -132,25 +135,29 @@ const ProductPage: FC = () => {
                             </ButtonsRow>
 
                             <Advantages>
-                                <Advantage>
-                                    <AdvantageIcon>
-                                        <Truck size={16} />
-                                    </AdvantageIcon>
+                                {product.delivery === "free" && (
+                                    <Advantage>
+                                        <AdvantageIcon>
+                                            <Truck size={16} />
+                                        </AdvantageIcon>
 
-                                    <AdvantageText>
-                                        Безкоштовна доставка
-                                    </AdvantageText>
-                                </Advantage>
+                                        <AdvantageText>
+                                            Безкоштовна доставка
+                                        </AdvantageText>
+                                    </Advantage>
+                                )}
 
-                                <Advantage>
-                                    <AdvantageIcon>
-                                        <ShieldCheck size={16} />
-                                    </AdvantageIcon>
+                                {!!product.guarantee && product.guarantee > 0 && (
+                                    <Advantage>
+                                        <AdvantageIcon>
+                                            <ShieldCheck size={16} />
+                                        </AdvantageIcon>
 
-                                    <AdvantageText>
-                                        Гарантія 12 місяців
-                                    </AdvantageText>
-                                </Advantage>
+                                        <AdvantageText>
+                                            Гарантія {product.guarantee} місяців
+                                        </AdvantageText>
+                                    </Advantage>
+                                )}
                             </Advantages>
                         </Right>
                     </Grid>
@@ -520,7 +527,7 @@ const ButtonsRow = styled.div`
     margin-top: 28px;
 `;
 
-const BuyButton = styled.button`
+const BuyButton = styled.button<{$disabled?: boolean}>`
     flex: 1;
 
     height: 50px;
@@ -528,12 +535,11 @@ const BuyButton = styled.button`
     border: none;
     border-radius: 12px;
 
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
+    background: linear-gradient(
+            135deg,
+            #16a34a 0%,
+            #22c55e 100%
+    );
 
     color: white;
 
@@ -547,14 +553,27 @@ const BuyButton = styled.button`
 
     cursor: pointer;
 
-    box-shadow:
-            0 10px 22px rgba(34,197,94,0.22);
+    box-shadow: 0 10px 22px rgba(34, 197, 94, 0.22);
 
     transition: 0.16s ease;
 
     &:hover {
         transform: translateY(-1px);
     }
+
+    ${p => p.$disabled && `
+        box-shadow: 0 10px 22px rgba(166, 208, 181, 0.22);
+        background: linear-gradient(
+            135deg,
+            #909893 0%,
+            #bfc9c4 100%
+        );
+        
+        cursor: default;
+        &:hover {
+            transform: none;
+        }
+    `}
 `;
 
 const FavoriteButton = styled.button`

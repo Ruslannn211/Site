@@ -1,14 +1,23 @@
 import { useEffect, useState } from "react";
 import type {ProductListType} from "@types-lib";
-import api from "@api";
+import api, {buildUrl} from "@api";
 
-const useProductsList = () => {
+export type ProductsFiltersType = {
+    ids: number[];
+    start_price: number | null;
+    end_price: number | null;
+    categories: string[];
+}
+
+const useProductsList = (filters?: ProductsFiltersType) => {
     const [loading, setLoading] = useState(false);
     const [list, setList] = useState<ProductListType[]>([]);
 
     async function handle() {
         setLoading(true);
-        const data = await api.get<ProductListType[]>('/user/products/list');
+        const data = await api.get<ProductListType[]>(buildUrl(
+            '/user/products/list', filters ?? {}
+        ));
         setLoading(false);
 
         if (data) {
@@ -19,7 +28,7 @@ const useProductsList = () => {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         handle();
-    }, []);
+    }, [filters]);
 
     return {list, loading};
 };

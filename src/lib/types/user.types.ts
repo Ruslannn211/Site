@@ -14,6 +14,14 @@ export type ProductListType = {
     createdAt: string;
 }
 
+export type RepairPriceType = {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    createdAt: string;
+}
+
 export type ProductFeatureType = {
     id: number;
     label: string;

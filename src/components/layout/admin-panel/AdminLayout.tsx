@@ -124,22 +124,6 @@ const AdminLayout: FC<Props> = ({
                             )}
                         </NavItem>
                     </NavGroup>
-
-                    <NavGroup>
-                        <NavTitle collapsed={collapsed}>
-                            Система
-                        </NavTitle>
-
-                        <NavItem>
-                            <Settings size={18} />
-
-                            {!collapsed && (
-                                <span>
-                                    Налаштування
-                                </span>
-                            )}
-                        </NavItem>
-                    </NavGroup>
                 </SidebarContent>
             </Sidebar>
 
@@ -152,7 +136,7 @@ const AdminLayout: FC<Props> = ({
                     </TopLeft>
 
                     <TopRight>
-                        <SiteButton>
+                        <SiteButton onClick={() => navigate("/products")}>
                             <Globe size={16} />
 
                             Відкрити сайт

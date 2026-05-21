@@ -1,26 +1,31 @@
-import {Search} from "lucide-react";
 import styled from "styled-components";
-import {useMemo, useState} from "react";
+import {type Dispatch, type SetStateAction} from "react";
 import useCategoriesList from "@hooks/useCategoriesList.tsx";
+import type {ProductsFiltersType} from "@hooks/useProductsList.tsx";
+import {convertToNumber} from "@helpers/convertToNumber.ts";
+import {Check} from "lucide-react";
 
-const BRANDS = [
-    "Apple",
-    "Samsung",
-    "Xiaomi",
-    "Sony",
-    "ASUS",
-    "Lenovo",
-];
+interface Props {
+    filtersState: [ProductsFiltersType, Dispatch<SetStateAction<ProductsFiltersType>>];
+}
 
-export default function CatalogFilters() {
-    const [search, setSearch] = useState("");
-    const {list} = useCategoriesList();
+export default function CatalogFilters(props: Props) {
+    const [filters, setFilters] = props.filtersState;
+    const {list: categories} = useCategoriesList();;
 
-    const filteredCategories = useMemo(() => {
-        return list.filter(c =>
-            c.toLowerCase().includes(search.toLowerCase())
-        );
-    }, [search, list]);
+    const update = (patch: Partial<ProductsFiltersType>) => {
+        setFilters((prev) => {
+            return {...prev, ...patch};
+        });
+    };
+
+    const toggleCategory = (category: string) => {
+        if (!filters.categories.includes(category)) {
+            update({categories: filters.categories.concat(category)});
+            return;
+        }
+        update({categories: filters.categories.filter(c => c !== category)});
+    }
 
     return (
         <Wrapper>
@@ -31,99 +36,48 @@ export default function CatalogFilters() {
                     </SectionTitle>
 
                     <PriceRow>
-                        <PriceInput placeholder={"від"} />
+                        <PriceInput placeholder={"від"} value={filters.start_price ?? ""}
+                                    onChange={e => {
+                                        const value = convertToNumber(e.target.value, filters.start_price);
+                                        update({start_price: value});
+                                    }}
+                        />
 
                         <Divider />
 
-                        <PriceInput placeholder={"до"} />
+                        <PriceInput placeholder={"до"} value={filters.end_price ?? ""}
+                                    onChange={e => {
+                                        const value = convertToNumber(e.target.value, filters.end_price);
+                                        update({end_price: value});
+                                    }}
+                        />
                     </PriceRow>
                 </Section>
 
                 <Section>
-                    <SectionTitle>
-                        Каталог
-                    </SectionTitle>
-
-                    <SearchWrapper>
-                        <SearchInput
-                            placeholder={"Пошук категорії"}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-
-                        <SearchIcon>
-                            <Search size={16} />
-                        </SearchIcon>
-                    </SearchWrapper>
-
+                    <SectionTitle>Категорії</SectionTitle>
                     <CategoriesList>
-                        {filteredCategories.map(category => (
-                            <CategoryItem key={category}>
+                        {categories.map(category => (
+                            <CategoryItem key={category} onClick={() => toggleCategory(category)}>
                                 <CategoryLeft>
-                                    <Checkbox />
+                                    <Checkbox
+                                        checked={filters.categories.includes(category)}
+                                    >
+                                        {filters.categories.includes(category) && (
+                                            <Check size={12} strokeWidth={3} />
+                                        )}
+                                    </Checkbox>
 
                                     <CategoryInfo>
                                         <CategoryName>
                                             {category}
                                         </CategoryName>
-
-                                        {/*<CategoryCount>
-                                            {category.count}
-                                        </CategoryCount>*/}
                                     </CategoryInfo>
                                 </CategoryLeft>
                             </CategoryItem>
                         ))}
                     </CategoriesList>
                 </Section>
-
-                {/*<Section>
-                    <SectionTitle>
-                        Бренд
-                    </SectionTitle>
-
-                    <BrandsList>
-                        {BRANDS.map(brand => (
-                            <BrandItem key={brand}>
-                                <BrandLeft>
-                                    <Checkbox />
-
-                                    <BrandName>
-                                        {brand}
-                                    </BrandName>
-                                </BrandLeft>
-                            </BrandItem>
-                        ))}
-                    </BrandsList>
-                </Section>
-
-                <Section>
-                    <SectionTitle>
-                        Наявність
-                    </SectionTitle>
-
-                    <BrandsList>
-                        <BrandItem>
-                            <BrandLeft>
-                                <Checkbox />
-
-                                <BrandName>
-                                    Є в наявності
-                                </BrandName>
-                            </BrandLeft>
-                        </BrandItem>
-
-                        <BrandItem>
-                            <BrandLeft>
-                                <Checkbox />
-
-                                <BrandName>
-                                    Акційні товари
-                                </BrandName>
-                            </BrandLeft>
-                        </BrandItem>
-                    </BrandsList>
-                </Section>*/}
             </Scroll>
         </Wrapper>
     );
@@ -240,71 +194,14 @@ const PriceInput = styled.input`
     }
 `;
 
-const SearchWrapper = styled.div`
-    position: relative;
-
-    margin-top: 14px;
-    margin-bottom: 12px;
-
-    width: 100%;
-
-    box-sizing: border-box;
-`;
-
-const SearchInput = styled.input`
-    width: 100%;
-
-    height: 42px;
-
-    padding: 0 40px 0 14px;
-
-    border-radius: 10px;
-
-    border: 1px solid #dbe4ee;
-
-    outline: none;
-
-    background: #f8fafc;
-
-    font-size: 14px;
-
-    transition: 0.16s ease;
-
-    box-sizing: border-box;
-
-    &:focus {
-        border-color: #94a3b8;
-        background: white;
-    }
-
-    &::placeholder {
-        color: #94a3b8;
-    }
-`;
-
-const SearchIcon = styled.div`
-    position: absolute;
-
-    right: 14px;
-    top: 50%;
-
-    transform: translateY(-50%);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #94a3b8;
-`;
-
 const CategoriesList = styled.div`
     display: flex;
     flex-direction: column;
     gap: 4px;
+    margin-top: 10px;
 `;
 
 const CategoryItem = styled.div`
-    min-height: 50px;
 
     padding: 8px 10px;
 
@@ -335,7 +232,7 @@ const CategoryLeft = styled.div`
     min-width: 0;
 `;
 
-const Checkbox = styled.div`
+const Checkbox = styled.div<{ checked?: boolean }>`
     width: 17px;
     height: 17px;
 
@@ -345,16 +242,25 @@ const Checkbox = styled.div`
 
     border-radius: 5px;
 
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid ${({ checked }) =>
+            checked ? "#16a34a" : "#cbd5e1"};
 
-    background: white;
+    background: ${({ checked }) =>
+            checked ? "#16a34a" : "white"};
 
     transition: 0.14s ease;
 
     box-sizing: border-box;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
     ${CategoryItem}:hover & {
-        border-color: #64748b;
+        border-color: ${({ checked }) =>
+                checked ? "#16a34a" : "#64748b"};
     }
 `;
 
@@ -374,55 +280,4 @@ const CategoryName = styled.div`
     color: #0f172a;
 
     word-break: break-word;
-`;
-
-const CategoryCount = styled.div`
-    margin-top: 2px;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    color: #94a3b8;
-`;
-
-const BrandsList = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    margin-top: 12px;
-`;
-
-const BrandItem = styled.div`
-    height: 42px;
-
-    padding: 0 10px;
-
-    border-radius: 10px;
-
-    display: flex;
-    align-items: center;
-
-    transition: 0.14s ease;
-
-    cursor: pointer;
-
-    box-sizing: border-box;
-
-    &:hover {
-        background: #f8fafc;
-    }
-`;
-
-const BrandLeft = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-`;
-
-const BrandName = styled.div`
-    font-size: 14px;
-    font-weight: 600;
-
-    color: #0f172a;
 `;

@@ -7,60 +7,17 @@ import {
     ShieldCheck,
     X,
 } from "lucide-react";
-
-interface RepairOption {
-    id: number;
-    title: string;
-    description: string;
-    price: number;
-}
-
-const REPAIR_OPTIONS: RepairOption[] = [
-    {
-        id: 1,
-        title: "Заміна дисплея",
-        description: "Повна заміна екрану та сенсора",
-        price: 3200,
-    },
-    {
-        id: 2,
-        title: "Заміна акумулятора",
-        description: "Встановлення нового акумулятора",
-        price: 1400,
-    },
-    {
-        id: 3,
-        title: "Заміна заднього скла",
-        description: "Ремонт або заміна корпусного скла",
-        price: 1800,
-    },
-    {
-        id: 4,
-        title: "Чистка після води",
-        description: "Діагностика та чистка плати",
-        price: 2200,
-    },
-    {
-        id: 5,
-        title: "Ремонт розʼєму зарядки",
-        description: "Заміна Type-C / Lightning",
-        price: 1200,
-    },
-    {
-        id: 6,
-        title: "Ремонт Face ID / камери",
-        description: "Відновлення модулів камери",
-        price: 2800,
-    },
-];
+import useRepairsPriceList from "@hooks/useRepairsPriceList.tsx";
+import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
 
 const RepairPage: FC = () => {
     const [opened, setOpened] = useState(false);
+    const {list: repairsPrice} = useRepairsPriceList();
 
     const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
 
     const totalPrice = useMemo(() => {
-        return REPAIR_OPTIONS
+        return repairsPrice
             .filter(option =>
                 selectedOptions.includes(option.id)
             )
@@ -111,7 +68,7 @@ const RepairPage: FC = () => {
                     </SectionTitle>
 
                     <RepairGrid>
-                        {REPAIR_OPTIONS.map(option => (
+                        {repairsPrice.map(option => (
                             <RepairCard key={option.id}>
                                 <RepairTop>
                                     <RepairIcon>
@@ -119,12 +76,12 @@ const RepairPage: FC = () => {
                                     </RepairIcon>
 
                                     <RepairPrice>
-                                        від {option.price.toLocaleString()} ₴
+                                        від {buildNumberFormat(option.price)} ₴
                                     </RepairPrice>
                                 </RepairTop>
 
                                 <RepairTitle>
-                                    {option.title}
+                                    {option.name}
                                 </RepairTitle>
 
                                 <RepairDescription>
@@ -165,7 +122,7 @@ const RepairPage: FC = () => {
                             </BlockTitle>
 
                             <OptionsGrid>
-                                {REPAIR_OPTIONS.map(option => {
+                                {repairsPrice.map(option => {
                                     const active =
                                         selectedOptions.includes(
                                             option.id
@@ -185,7 +142,7 @@ const RepairPage: FC = () => {
 
                                             <OptionInfo>
                                                 <OptionTitle>
-                                                    {option.title}
+                                                    {option.name}
                                                 </OptionTitle>
 
                                                 <OptionPrice>
@@ -633,7 +590,6 @@ const OptionsGrid = styled.div`
 `;
 
 const OptionCard = styled.button<{ active: boolean }>`
-    min-height: 84px;
 
     padding: 14px;
 
@@ -681,9 +637,12 @@ const OptionCheck = styled.div<{ active: boolean }>`
 
 const OptionInfo = styled.div`
     flex: 1;
+    display: flex;
+    flex-direction: column;
 `;
 
 const OptionTitle = styled.div`
+    text-align: start;
     font-size: 14px;
     font-weight: 700;
 
@@ -691,6 +650,7 @@ const OptionTitle = styled.div`
 `;
 
 const OptionPrice = styled.div`
+    text-align: start;
     margin-top: 6px;
 
     font-size: 13px;
@@ -700,6 +660,7 @@ const OptionPrice = styled.div`
 `;
 
 const InputsGrid = styled.div`
+    margin-top: -10px;
     display: grid;
 
     grid-template-columns: repeat(2, 1fr);

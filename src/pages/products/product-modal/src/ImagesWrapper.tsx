@@ -109,7 +109,6 @@ const ImagesWrapper: FC<Props> = (props) => {
 
                 <ImageControls>
                     <ImageControlButton
-                        onMouseEnter={e => e.stopPropagation()}
                         onClick={() =>
                             setCurrentImage(prev =>
                                 prev === 0
@@ -122,7 +121,6 @@ const ImagesWrapper: FC<Props> = (props) => {
                     </ImageControlButton>
 
                     <ImageControlButton
-                        onMouseEnter={e => e.stopPropagation()}
                         onClick={() =>
                             setCurrentImage(prev =>
                                 prev === product.images.length - 1
@@ -164,6 +162,7 @@ const Container = styled.div`
 `;
 
 const Wrapper = styled.div`
+    position: relative;
     aspect-ratio: 1 / 1;
 
     width: 100%;
