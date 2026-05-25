@@ -19,6 +19,7 @@
     "@atlaskit/textfield": "^8.3.2",
     "@atlaskit/tokens": "^13.0.3",
     "@reduxjs/toolkit": "^2.12.0",
+    "libphonenumber-js": "^1.13.3",
     "lucide-react": "^1.16.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

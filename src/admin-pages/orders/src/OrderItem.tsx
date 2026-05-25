@@ -21,7 +21,7 @@ const OrdersPage: FC<Props> = ({order}) => {
     };
 
     const totalPrice = useMemo(() => {
-        return order.products.reduce((acc, product) => acc + product.price, 0);
+        return order.products.reduce((acc, product) => acc + product.price * product.count, 0);
     }, [order.products]);
 
     return (

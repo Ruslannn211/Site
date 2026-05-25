@@ -12,6 +12,7 @@ import useProductImage from "@hooks/useProductImage.tsx";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
 import {buildProductPrice} from "@helpers/buildProductPrice.ts";
 import useCart from "@hooks/useCart.tsx";
+import useFavorite from "@hooks/useFavorite.tsx";
 
 interface Props {
     product: ProductListType;
@@ -24,6 +25,9 @@ const ProductItem: FC<Props> = (props) => {
     const image = useProductImage(product.previewImage);
     const cart = useCart();
 
+    const favorite = useFavorite();
+    const inFavorite = product ? favorite.isInFavorite(product.id) : false;
+
     return (
         <ProductCard key={product.id} onClick={() => navigate(`/products/` + String(product.id))}>
             <CardTop>
@@ -33,8 +37,11 @@ const ProductItem: FC<Props> = (props) => {
                     </Badge>
                 )}
 
-                <WishlistButton>
-                    <Heart size={16} />
+                <WishlistButton onClick={(e) => {
+                    e.stopPropagation();
+                    favorite.toggleFavorite(product.id);
+                }}>
+                    <Heart size={16} fill={inFavorite ? "currentColor" : "transparent"} />
                 </WishlistButton>
             </CardTop>
 

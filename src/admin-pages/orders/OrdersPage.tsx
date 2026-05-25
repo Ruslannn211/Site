@@ -13,7 +13,7 @@ const OrdersPage: FC = () => {
 
     const totalPrice = useMemo(() => {
         return orders.reduce((acc, order) => (
-            acc + (order.products.reduce((acc, product) => acc + product.price, 0))
+            acc + (order.products.reduce((acc, product) => acc + product.price * product.count, 0))
         ), 0);
     }, [orders]);
 

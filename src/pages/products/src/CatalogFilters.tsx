@@ -20,8 +20,8 @@ export default function CatalogFilters(props: Props) {
     };
 
     const toggleCategory = (category: string) => {
-        if (!filters.categories.includes(category)) {
-            update({categories: filters.categories.concat(category)});
+        if (!filters.categories?.includes(category)) {
+            update({categories: filters.categories?.concat(category)});
             return;
         }
         update({categories: filters.categories.filter(c => c !== category)});
@@ -60,10 +60,8 @@ export default function CatalogFilters(props: Props) {
                         {categories.map(category => (
                             <CategoryItem key={category} onClick={() => toggleCategory(category)}>
                                 <CategoryLeft>
-                                    <Checkbox
-                                        checked={filters.categories.includes(category)}
-                                    >
-                                        {filters.categories.includes(category) && (
+                                    <Checkbox checked={filters.categories?.includes(category)}>
+                                        {filters.categories?.includes(category) && (
                                             <Check size={12} strokeWidth={3} />
                                         )}
                                     </Checkbox>

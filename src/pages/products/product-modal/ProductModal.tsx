@@ -3,7 +3,6 @@ import styled from "styled-components";
 import {
     ArrowLeft,
     Heart,
-    MessageCircle,
     ShieldCheck,
     ShoppingCart,
     Star,
@@ -18,14 +17,19 @@ import { buildNumberFormat } from "@helpers/buildNumberFormat";
 import ProductFeatureList from "@pages/products/product-modal/src/ProductFeatureList.tsx";
 import useCart from "@hooks/useCart.tsx";
 import ReviewsComponent from "@pages/products/product-modal/src/reviews/ReviewsComponent.tsx";
+import useFavorite from "@hooks/useFavorite.tsx";
 
 const ProductPage: FC = () => {
     const params = useProductOpen();
     const navigate = useNavigate();
 
     const {product} = useProductOne(params.product);
+
     const cart = useCart();
     const inCart = product ? cart.isInCart(product.id) : false;
+
+    const favorite = useFavorite();
+    const inFavorite = product ? favorite.isInFavorite(product.id) : false;
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -130,8 +134,14 @@ const ProductPage: FC = () => {
                                     {inCart ? "Вже у кошику" : "Додати до кошику"}
                                 </BuyButton>
 
-                                <FavoriteButton>
-                                    <Heart size={18} />
+                                <FavoriteButton
+                                    $active={inFavorite}
+                                    onClick={() => favorite.toggleFavorite(product.id)}
+                                >
+                                    <Heart
+                                        size={18}
+                                        fill={inFavorite ? "currentColor" : "transparent"}
+                                    />
                                 </FavoriteButton>
                             </ButtonsRow>
 
@@ -546,17 +556,34 @@ const BuyButton = styled.button<{$disabled?: boolean}>`
     `}
 `;
 
-const FavoriteButton = styled.button`
+const FavoriteButton = styled.button<{
+    $active?: boolean;
+}>`
     width: 50px;
     height: 50px;
 
     border-radius: 12px;
 
-    border: 1px solid #e2e8f0;
+    border: 1px solid ${({ $active }) =>
+    $active
+        ? "rgba(239,68,68,0.25)"
+        : "#e2e8f0"};
 
-    background: white;
+    background: ${({ $active }) =>
+    $active
+        ? `
+                linear-gradient(
+                    135deg,
+                    rgba(239,68,68,0.12) 0%,
+                    rgba(248,113,113,0.16) 100%
+                )
+            `
+        : "white"};
 
-    color: #f59e0b;
+    color: ${({ $active }) =>
+    $active
+        ? "#ef4444"
+        : "#94a3b8"};
 
     display: flex;
     align-items: center;
@@ -564,10 +591,50 @@ const FavoriteButton = styled.button`
 
     cursor: pointer;
 
-    transition: 0.16s ease;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.14s ease,
+        box-shadow 0.18s ease;
+
+    box-shadow: ${({ $active }) =>
+    $active
+        ? "0 8px 18px rgba(239,68,68,0.16)"
+        : "none"};
+
+    svg {
+        transition:
+            transform 0.16s ease,
+            fill 0.16s ease;
+    }
 
     &:hover {
-        background: #f8fafc;
+        transform: translateY(-1px);
+
+        border-color: ${({ $active }) =>
+    $active
+        ? "rgba(239,68,68,0.35)"
+        : "#cbd5e1"};
+
+        background: ${({ $active }) =>
+    $active
+        ? `
+                    linear-gradient(
+                        135deg,
+                        rgba(239,68,68,0.16) 0%,
+                        rgba(248,113,113,0.20) 100%
+                    )
+                `
+        : "#f8fafc"};
+
+        svg {
+            transform: scale(1.08);
+        }
+    }
+
+    &:active {
+        transform: scale(0.96);
     }
 `;
 

@@ -13,14 +13,16 @@ import {
 } from "lucide-react";
 import myIcon from "/logo-transparent3.png";
 import {useNavigate} from "react-router-dom";
+import ProfileMenu from "@components/layout/user-panel/ProfileMenu.tsx";
+import {useStore} from "@store";
 
 interface Props {
     children?: ReactNode;
 }
 
-const AdminLayout: FC<Props> = ({
-                                    children,
-                                }) => {
+const AdminLayout: FC<Props> = ({children,}) => {
+    const {user} = useStore(store => store.global.user);
+
     const [collapsed, setCollapsed] = useState(false);
     const routes = location.pathname.split("/").slice(2);
     const navigate = useNavigate();
@@ -140,21 +142,9 @@ const AdminLayout: FC<Props> = ({
                             Відкрити сайт
                         </SiteButton>
 
-                        <Profile>
-                            <Avatar>
-                                A
-                            </Avatar>
-
-                            <ProfileInfo>
-                                <ProfileName>
-                                    Адміністратор
-                                </ProfileName>
-
-                                <ProfileRole>
-                                    TechPanda Admin
-                                </ProfileRole>
-                            </ProfileInfo>
-                        </Profile>
+                        {user && (
+                            <ProfileMenu user={user} hideAdmin />
+                        )}
                     </TopRight>
                 </TopBar>
 
@@ -455,67 +445,6 @@ const SiteButton = styled.button`
         box-shadow:
                 0 10px 20px rgba(15,23,42,0.06);
     }
-`;
-
-const Profile = styled.div`
-    height: 50px;
-
-    padding: 0 16px;
-
-    border-radius: 16px;
-
-    background: white;
-
-    border: 1px solid #e2e8f0;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    box-shadow:
-            0 8px 18px rgba(15,23,42,0.04);
-`;
-
-const Avatar = styled.div`
-    width: 36px;
-    height: 36px;
-
-    border-radius: 12px;
-
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 14px;
-    font-weight: 900;
-`;
-
-const ProfileInfo = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-const ProfileName = styled.div`
-    font-size: 13px;
-    font-weight: 800;
-
-    color: #0f172a;
-`;
-
-const ProfileRole = styled.div`
-    font-size: 11px;
-    font-weight: 600;
-
-    color: #64748b;
 `;
 
 const Content = styled.div`

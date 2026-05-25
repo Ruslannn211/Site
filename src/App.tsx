@@ -5,15 +5,8 @@ import AppAdminNavigator from "./admin-pages/AppAdminNavigator.tsx";
 function App() {
     return (
         <Routes>
-            <Route
-                path="/control/*"
-                element={<AppAdminNavigator />}
-            />
-
-            <Route
-                path="/*"
-                element={<AppNavigator />}
-            />
+            <Route path="/control/*" element={<AppAdminNavigator />}/>
+            <Route path="/*" element={<AppNavigator />}/>
         </Routes>
     );
 }

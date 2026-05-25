@@ -3,10 +3,11 @@ import type {ProductListType} from "@types-lib";
 import api, {buildUrl} from "@api";
 
 export type ProductsFiltersType = {
-    ids: number[];
-    start_price: number | null;
-    end_price: number | null;
-    categories: string[];
+    search?: string | null;
+    ids?: number[];
+    start_price?: number | null;
+    end_price?: number | null;
+    categories?: string[];
 }
 
 const useProductsList = (filters?: ProductsFiltersType) => {

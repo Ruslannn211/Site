@@ -3,22 +3,26 @@ import styled from "styled-components";
 import myIcon from "/logo-transparent3.png";
 
 import {
-    Search,
     ShoppingCart,
     Heart,
     User,
     Wrench,
-    Package, ShieldCheck,
+    Package,
 } from "lucide-react";
 import {useNavigate} from "react-router-dom";
 import useCart from "@hooks/useCart.tsx";
+import {useStore} from "@store";
+import ProfileMenu from "@components/layout/user-panel/ProfileMenu.tsx";
+import useFavorite from "@hooks/useFavorite.tsx";
 
 interface Props {
     openCart: () => void;
+    openFavorite: () => void;
     openAuth: () => void;
 }
 
 const TopNav: FC<Props> = (props) => {
+    const {user} = useStore(store => store.global.user);
     const routes = location.pathname.split("/").slice(1);
     const navigate = useNavigate();
 
@@ -26,6 +30,7 @@ const TopNav: FC<Props> = (props) => {
         navigate("/" + new_type);
     }
 
+    const favorite = useFavorite();
     const cart = useCart();
 
     return (
@@ -65,24 +70,15 @@ const TopNav: FC<Props> = (props) => {
                     </ModeSwitcher>
                 </Left>
 
-                <SearchWrapper>
-                    {routes[0] === "products" && (
-                        <>
-                            <SearchIcon>
-                                <Search size={18} />
-                            </SearchIcon>
-                            <SearchInput placeholder={"Пошук товарів, комплектуючих..."}/>
-                        </>
-                    )}
-                </SearchWrapper>
-
                 <Right>
-                    <NavIconButton>
+                    <NavIconButton onClick={props.openFavorite}>
                         <Heart size={19} />
 
-                        <Badge>
-                            2
-                        </Badge>
+                        {favorite.favorite.length > 0 && (
+                            <Badge>
+                                {favorite.favorite.length}
+                            </Badge>
+                        )}
                     </NavIconButton>
 
                     <NavIconButton onClick={props.openCart}>
@@ -95,17 +91,14 @@ const TopNav: FC<Props> = (props) => {
                         )}
                     </NavIconButton>
 
-                    <ProfileButton onClick={props.openAuth}>
-                        <User size={17} />
-
-                        Увійти
-                    </ProfileButton>
-
-                    <AdminButton onClick={() => navigate("/control")}>
-                        <ShieldCheck size={17} />
-
-                        Адмін панель
-                    </AdminButton>
+                    {user ? (
+                        <ProfileMenu user={user} />
+                    ) : (
+                        <ProfileButton onClick={props.openAuth}>
+                            <User size={17} />
+                            Увійти
+                        </ProfileButton>
+                    )}
                 </Right>
             </Content>
         </Container>
@@ -285,76 +278,11 @@ const ModeButton = styled.button<{ $active: boolean }>`
     }
 `;
 
-const SearchWrapper = styled.div`
-    flex: 1;
-
-    height: 42px;
-
-    position: relative;
-
-    display: flex;
-    align-items: center;
-`;
-
-const SearchIcon = styled.div`
-    position: absolute;
-
-    left: 16px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: #64748b;
-`;
-
-const SearchInput = styled.input`
-    width: 100%;
-    height: 100%;
-
-    padding: 0 18px 0 46px;
-
-    border-radius: 10px;
-
-    border: 1px solid #e2e8f0;
-
-    outline: none;
-
-    background:
-            linear-gradient(
-                    180deg,
-                    #ffffff 0%,
-                    #f8fafc 100%
-            );
-
-    font-size: 14px;
-    font-weight: 500;
-
-    color: #0f172a;
-
-    transition: 0.18s ease;
-
-    box-sizing: border-box;
-
-    box-shadow:
-            inset 0 1px 2px rgba(15,23,42,0.03);
-
-    &::placeholder {
-        color: #94a3b8;
-    }
-
-    &:focus {
-        border-color: #94a3b8;
-
-        box-shadow:
-                0 0 0 4px rgba(148,163,184,0.10),
-                inset 0 1px 2px rgba(15,23,42,0.03);
-    }
-`;
-
 const Right = styled.div`
     display: flex;
     align-items: center;
+    justify-content: end;
+    flex: 1;
     gap: 10px;
 
     flex-shrink: 0;
@@ -467,56 +395,5 @@ const ProfileButton = styled.button`
 
         box-shadow:
                 0 10px 18px rgba(15,23,42,0.08);
-    }
-`;
-
-const AdminButton = styled.button`
-    height: 40px;
-
-    padding: 0 16px;
-
-    border-radius: 10px;
-
-    border: 1px solid rgba(255,255,255,0.08);
-
-    background:
-            linear-gradient(
-                    135deg,
-                    #111827 0%,
-                    #1f2937 100%
-            );
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    font-size: 14px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition: 0.18s ease;
-
-    box-shadow:
-            0 8px 18px rgba(15,23,42,0.14);
-
-    &:hover {
-        transform: translateY(-1px);
-
-        background:
-                linear-gradient(
-                        135deg,
-                        #0f172a 0%,
-                        #111827 100%
-                );
-
-        box-shadow:
-                0 14px 24px rgba(15,23,42,0.20);
-    }
-
-    &:active {
-        transform: translateY(0);
     }
 `;

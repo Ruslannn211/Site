@@ -1,3 +1,15 @@
+export interface UserType {
+    id: number;
+    first_name: string;
+    last_name: string | null;
+    patronymic: string | null;
+    email: string | null;
+    phone_number: string | null;
+    isAdmin: boolean | null;
+    updatedAt: string;
+    createdAt: string;
+}
+
 export type ProductListType = {
     id: number;
     code: string;

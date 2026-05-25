@@ -1,19 +1,25 @@
-import {type FC, useState} from "react";
+import {type FC, useMemo, useState} from "react";
 import styled from "styled-components";
-import {
-    ChevronLeft,
-    ChevronRight,
-} from "lucide-react";
 import CatalogFilters from "./src/CatalogFilters.tsx";
 import ProductModal from "./product-modal/ProductModal.tsx";
 import useProductsList, {type ProductsFiltersType} from "@hooks/useProductsList.tsx";
 import ProductItem from "@pages/products/src/ProductItem.tsx";
+import {hasActiveFilters} from "@helpers/hasActiveFilters.ts";
+import {Search} from "lucide-react";
 
 const ProductsPage: FC = () => {
     const [filters, setFilters] = useState<ProductsFiltersType>({
-        start_price: null, end_price: null, ids: [], categories: []
+        start_price: null, end_price: null, ids: [], categories: [], search: null
     });
     const {list} = useProductsList(filters);
+
+    const isActiveFilters = useMemo(() => hasActiveFilters(filters), [filters]);
+
+    const update = (patch: Partial<ProductsFiltersType>) => {
+        setFilters((prev) => {
+            return {...prev, ...patch};
+        });
+    };
 
     return (
         <Container>
@@ -21,8 +27,20 @@ const ProductsPage: FC = () => {
 
             <Content>
                 <TopBlock>
+                    <SearchWrapper>
+                        <SearchIcon>
+                            <Search size={18} />
+                        </SearchIcon>
+                        <SearchInput placeholder={"Пошук товарів, комплектуючих..."}
+                                     onChange={e => {
+                                         const value = e.target.value;
+                                         update({search: value.trim().length > 0 ? value : null})
+                                     }} value={filters.search ?? ''}
+                        />
+                    </SearchWrapper>
+
                     <BlockTitle>
-                        Усі товари магазину
+                        {isActiveFilters ? 'Всі товари за вашим пошуком' : 'Усі товари магазину'}
                     </BlockTitle>
 
                     <BlockDescription>
@@ -35,25 +53,6 @@ const ProductsPage: FC = () => {
                         <ProductItem product={product} key={product.id} />
                     ))}
                 </ProductsGrid>
-
-                {/*<Pagination>
-                    <PaginationButton disabled>
-                        <ChevronLeft size={18} />
-                    </PaginationButton>
-
-                    {Array.from({length: 2}).map((_, index) => (
-                        <PageButton
-                            key={index}
-                            active={1 === index + 1}
-                        >
-                            {index + 1}
-                        </PageButton>
-                    ))}
-
-                    <PaginationButton>
-                        <ChevronRight size={18} />
-                    </PaginationButton>
-                </Pagination>*/}
             </Content>
             <ProductModal />
         </Container>
@@ -91,7 +90,6 @@ const Content = styled.div`
 
 const TopBlock = styled.div`
     margin-bottom: 18px;
-    margin-top: 4px;
 `;
 
 const BlockTitle = styled.div`
@@ -119,54 +117,70 @@ const ProductsGrid = styled.div`
     gap: 8px;
 `;
 
-const Pagination = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
+const SearchWrapper = styled.div`
+    flex: 1;
 
-    margin-top: 26px;
+    height: 42px;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
 `;
 
-const PaginationButton = styled.button`
-    width: 38px;
-    height: 38px;
+const SearchIcon = styled.div`
+    position: absolute;
 
-    border-radius: 10px;
+    left: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #64748b;
+`;
+
+const SearchInput = styled.input`
+    width: 100%;
+    height: 100%;
+
+    padding: 0 18px 0 46px;
+
+    border-radius: 6px;
 
     border: 1px solid #e2e8f0;
 
-    background: white;
+    outline: none;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background:
+            linear-gradient(
+                    180deg,
+                    #ffffff 0%,
+                    #f8fafc 100%
+            );
 
-    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    color: #0f172a;
+
+    transition: 0.18s ease;
+
+    box-sizing: border-box;
+
+    box-shadow:
+            inset 0 1px 2px rgba(15,23,42,0.03);
+
+    &::placeholder {
+        color: #94a3b8;
     }
-`;
 
-const PageButton = styled.button<{ active: boolean }>`
-    width: 38px;
-    height: 38px;
+    &:focus {
+        border-color: #94a3b8;
 
-    border-radius: 10px;
-
-    border: 1px solid ${({active}) =>
-    active ? "#111827" : "#e2e8f0"};
-
-    background: ${({active}) =>
-    active ? "#111827" : "white"};
-
-    color: ${({active}) =>
-    active ? "white" : "#0f172a"};
-
-    font-size: 13px;
-    font-weight: 700;
-
-    cursor: pointer;
+        box-shadow:
+                0 0 0 4px rgba(148,163,184,0.10),
+                inset 0 1px 2px rgba(15,23,42,0.03);
+    }
 `;
