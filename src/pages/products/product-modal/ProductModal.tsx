@@ -13,10 +13,11 @@ import useProductOpen from "@pages/products/product-modal/hooks/useProductOpen.t
 import {useNavigate} from "react-router-dom";
 import useProductOne from "@hooks/useProductOne.tsx";
 import ImagesWrapper from "@pages/products/product-modal/src/ImagesWrapper.tsx";
-import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
+import {buildProductPrice} from "@helpers/buildProductPrice.ts";
 import { buildNumberFormat } from "@helpers/buildNumberFormat";
 import ProductFeatureList from "@pages/products/product-modal/src/ProductFeatureList.tsx";
 import useCart from "@hooks/useCart.tsx";
+import ReviewsComponent from "@pages/products/product-modal/src/reviews/ReviewsComponent.tsx";
 
 const ProductPage: FC = () => {
     const params = useProductOpen();
@@ -103,7 +104,7 @@ const ProductPage: FC = () => {
 
                                 <PriceRow>
                                     <CurrentPrice>
-                                        {buildNumberFormat(buildProducrPrice(product))} ₴
+                                        {buildNumberFormat(buildProductPrice(product))} ₴
                                     </CurrentPrice>
 
                                     {(product.discount ?? 0) > 0 && (
@@ -162,6 +163,7 @@ const ProductPage: FC = () => {
                         </Right>
                     </Grid>
                 )}
+                <ReviewsComponent />
             </Content>
         </Container>
     );
@@ -486,38 +488,6 @@ const Description = styled.div`
     line-height: 1.7;
 
     color: #475569;
-`;
-
-const Characteristics = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    margin-top: 24px;
-`;
-
-const Characteristic = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding-bottom: 10px;
-
-    border-bottom: 1px solid #edf2f7;
-`;
-
-const Label = styled.div`
-    font-size: 13px;
-    font-weight: 600;
-
-    color: #64748b;
-`;
-
-const Value = styled.div`
-    font-size: 13px;
-    font-weight: 700;
-
-    color: #0f172a;
 `;
 
 const ButtonsRow = styled.div`

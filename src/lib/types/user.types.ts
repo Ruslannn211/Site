@@ -11,6 +11,7 @@ export type ProductListType = {
     guarantee: number;
     badge: "promotion" | "top" | "new" | null;
     previewImage: string | null;
+    orders: number
     createdAt: string;
 }
 

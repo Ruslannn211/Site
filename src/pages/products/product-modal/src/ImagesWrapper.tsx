@@ -86,63 +86,65 @@ const ImagesWrapper: FC<Props> = (props) => {
     };
 
     return (
-        <Container>
-            <Wrapper
-                ref={imageRef}
-                onMouseEnter={() => setZoomVisible(true)}
-                onMouseLeave={() => setZoomVisible(false)}
-                onMouseMove={handleMouseMove}
-            >
-                <MainImage
-                    src={image}
-                    ref={imgRef}
-                    alt={"product"}
-                />
-
-                <ZoomLens
-                    visible={zoomVisible}
-                    style={{
-                        left: lensPosition.x - 110,
-                        top: lensPosition.y - 90,
-                    }}
-                />
-
-                <ImageControls>
-                    <ImageControlButton
-                        onClick={() =>
-                            setCurrentImage(prev =>
-                                prev === 0
-                                    ? product.images.length - 1
-                                    : prev - 1
-                            )
-                        }
-                    >
-                        <ChevronLeft size={18} />
-                    </ImageControlButton>
-
-                    <ImageControlButton
-                        onClick={() =>
-                            setCurrentImage(prev =>
-                                prev === product.images.length - 1
-                                    ? 0
-                                    : prev + 1
-                            )
-                        }
-                    >
-                        <ChevronRight size={18} />
-                    </ImageControlButton>
-                </ImageControls>
-            </Wrapper>
-            <Thumbs>
-                {product.images.map((filename, index) => (
-                    <ImageThumb
-                        key={filename}
-                        filename={filename}
-                        active={currentImage === index}
-                        onClick={() => setCurrentImage(index)}
+        <>
+            <Container>
+                <Wrapper
+                    ref={imageRef}
+                    onMouseEnter={() => setZoomVisible(true)}
+                    onMouseLeave={() => setZoomVisible(false)}
+                    onMouseMove={handleMouseMove}
+                >
+                    <MainImage
+                        src={image}
+                        ref={imgRef}
+                        alt={"product"}
                     />
-                ))}
-            </Thumbs>
+
+                    <ZoomLens
+                        visible={zoomVisible}
+                        style={{
+                            left: lensPosition.x - 110,
+                            top: lensPosition.y - 90,
+                        }}
+                    />
+
+                    <ImageControls>
+                        <ImageControlButton
+                            onClick={() =>
+                                setCurrentImage(prev =>
+                                    prev === 0
+                                        ? product.images.length - 1
+                                        : prev - 1
+                                )
+                            }
+                        >
+                            <ChevronLeft size={18} />
+                        </ImageControlButton>
+
+                        <ImageControlButton
+                            onClick={() =>
+                                setCurrentImage(prev =>
+                                    prev === product.images.length - 1
+                                        ? 0
+                                        : prev + 1
+                                )
+                            }
+                        >
+                            <ChevronRight size={18} />
+                        </ImageControlButton>
+                    </ImageControls>
+                </Wrapper>
+                <Thumbs>
+                    {product.images.map((filename, index) => (
+                        <ImageThumb
+                            key={filename}
+                            filename={filename}
+                            active={currentImage === index}
+                            onClick={() => setCurrentImage(index)}
+                        />
+                    ))}
+                </Thumbs>
+            </Container>
             <ZoomContainer visible={zoomVisible}>
                 <ZoomedImage
                     style={{
@@ -151,14 +153,15 @@ const ImagesWrapper: FC<Props> = (props) => {
                     }}
                 />
             </ZoomContainer>
-        </Container>
+        </>
     );
 };
 
 export default ImagesWrapper;
 
 const Container = styled.div`
-    
+    position: sticky;
+    top: 80px;
 `;
 
 const Wrapper = styled.div`

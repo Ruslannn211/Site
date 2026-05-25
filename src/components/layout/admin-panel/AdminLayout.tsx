@@ -1,12 +1,10 @@
 import {type FC, type ReactNode, useState} from "react";
 import styled from "styled-components";
 import {
-    Bell,
     ChevronLeft,
     ChevronRight,
     LayoutDashboard,
     Package,
-    Settings,
     ShoppingCart,
     Users,
     Wrench,
@@ -141,12 +139,6 @@ const AdminLayout: FC<Props> = ({
 
                             Відкрити сайт
                         </SiteButton>
-
-                        <NotificationButton>
-                            <Bell size={17} />
-
-                            <NotificationDot />
-                        </NotificationButton>
 
                         <Profile>
                             <Avatar>
@@ -465,41 +457,6 @@ const SiteButton = styled.button`
     }
 `;
 
-const NotificationButton = styled.button`
-    position: relative;
-
-    width: 44px;
-    height: 44px;
-
-    border-radius: 14px;
-
-    border: 1px solid #e2e8f0;
-
-    background: white;
-
-    color: #0f172a;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-`;
-
-const NotificationDot = styled.div`
-    position: absolute;
-
-    top: 10px;
-    right: 10px;
-
-    width: 8px;
-    height: 8px;
-
-    border-radius: 999px;
-
-    background: #ef4444;
-`;
-
 const Profile = styled.div`
     height: 50px;
 
@@ -555,8 +512,6 @@ const ProfileName = styled.div`
 `;
 
 const ProfileRole = styled.div`
-    margin-top: 2px;
-
     font-size: 11px;
     font-weight: 600;
 

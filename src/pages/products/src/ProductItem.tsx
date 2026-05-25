@@ -10,7 +10,7 @@ import {useNavigate} from "react-router-dom";
 import type {ProductListType} from "@types-lib";
 import useProductImage from "@hooks/useProductImage.tsx";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
-import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
+import {buildProductPrice} from "@helpers/buildProductPrice.ts";
 import useCart from "@hooks/useCart.tsx";
 
 interface Props {
@@ -72,7 +72,7 @@ const ProductItem: FC<Props> = (props) => {
                 <PriceBlock>
                     <PriceRow>
                         <CurrentPrice $discount={!!product.discount && product.discount > 0}>
-                            {buildNumberFormat(buildProducrPrice(product))} ₴
+                            {buildNumberFormat(buildProductPrice(product))} ₴
                         </CurrentPrice>
 
                         <CartButton $disabled={cart.isInCart(product.id)}

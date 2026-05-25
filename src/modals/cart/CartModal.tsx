@@ -4,8 +4,8 @@ import {ShoppingBag, X,} from "lucide-react";
 import {useNavigate} from "react-router-dom";
 import useCart from "@hooks/useCart.tsx";
 import useProductsList from "@hooks/useProductsList.tsx";
-import CartProduct from "@components/cart/src/CartProduct.tsx";
-import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
+import CartProduct from "./src/CartProduct.tsx";
+import {buildProductPrice} from "@helpers/buildProductPrice.ts";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
 
 interface Props {
@@ -28,7 +28,7 @@ const CartModal: FC<Props> = (props) => {
     const totalPrice = useMemo(
         () => list.reduce(
             (sum, i) => (
-                sum + (buildProducrPrice(i) * cart.getCartCount(i.id))
+                sum + (buildProductPrice(i) * cart.getCartCount(i.id))
             ), 0),
         [cart, list]
     );

@@ -18,7 +18,7 @@ export async function apiImageBlob(
         if (options.q) params.append('q', String(options.q));
 
         const query = params.toString();
-        const url = `/user/products/image/${avatar}${query ? `?${query}` : ''}`;
+        const url = `/image/${avatar}${query ? `?${query}` : ''}`;
 
         const blob = await api.get<Blob>(url, {
             skipJsonContentType: true,

@@ -2,7 +2,7 @@ import ProductsPage from "@pages/products/ProductsPage.tsx";
 import RepairPage from "@pages/repair/RepairPage.tsx";
 import {Navigate, Route, Routes} from "react-router-dom";
 import UserLayout from "@components/layout/user-panel/UserLayout.tsx";
-import CheckoutPage from "@components/checkout/CheckoutPage.tsx";
+import CheckoutPage from "@pages/checkout/CheckoutPage.tsx";
 
 function AppNavigator() {
     return (

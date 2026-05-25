@@ -15,6 +15,7 @@ import useCart from "@hooks/useCart.tsx";
 
 interface Props {
     openCart: () => void;
+    openAuth: () => void;
 }
 
 const TopNav: FC<Props> = (props) => {
@@ -94,7 +95,7 @@ const TopNav: FC<Props> = (props) => {
                         )}
                     </NavIconButton>
 
-                    <ProfileButton>
+                    <ProfileButton onClick={props.openAuth}>
                         <User size={17} />
 
                         Увійти

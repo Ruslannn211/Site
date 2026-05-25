@@ -8,7 +8,7 @@ import {
 import type {ProductListType} from "@types-lib";
 import useProductImage from "@hooks/useProductImage.tsx";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
-import {buildProducrPrice} from "@helpers/buildProducrPrice.ts";
+import {buildProductPrice} from "@helpers/buildProductPrice.ts";
 import useCart from "@hooks/useCart.tsx";
 
 interface Props {
@@ -57,7 +57,7 @@ const CartProduct: FC<Props> = (props) => {
                             </CountButton>
                         </CountControls>
                         <ProductPrice>
-                            {buildNumberFormat(buildProducrPrice(product))} ₴
+                            {buildNumberFormat(buildProductPrice(product))} ₴
                         </ProductPrice>
                     </FlexContainer>
 
