@@ -30,6 +30,36 @@ const ProductsPage: FC = () => {
         );
     }, [products]);
 
+    const averageRating = useMemo(() => {
+        if (!products.length) {
+            return 0;
+        }
+
+        return (
+            products.reduce(
+                (acc, product) =>
+                    acc + product.rating,
+                0
+            ) / products.length
+        );
+    }, [products]);
+
+    const conversion = useMemo(() => {
+        if (!products.length) {
+            return 0;
+        }
+
+        const soldProducts =
+            products.filter(
+                product => product.orders > 0
+            ).length;
+
+        return (
+            (soldProducts / products.length) *
+            100
+        );
+    }, [products]);
+
     return (
         <Container>
             <TopBar>
@@ -61,8 +91,8 @@ const ProductsPage: FC = () => {
             <StatsGrid>
                 <StatCardAdmin icon={<Package size={18} />} label={"Всього товарів"} value={buildNumberFormat(products.length)} />
                 <StatCardAdmin icon={<ShoppingCart size={18} />} label={"Замовлень"} value={buildNumberFormat(totalOrders)} />
-                <StatCardAdmin icon={<TrendingUp size={18} />} label={"Конверсія"} value={'94%'} />
-                <StatCardAdmin icon={<Star size={18} />} label={"Середній рейтинг"} value={buildNumberFormat('4.8')} />
+                <StatCardAdmin icon={<TrendingUp size={18} />} label={"Конверсія"} value={`${conversion}%`} />
+                <StatCardAdmin icon={<Star size={18} />} label={"Середній рейтинг"} value={`${averageRating}`} />
             </StatsGrid>
 
             <ProductsList>

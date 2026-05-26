@@ -4,20 +4,26 @@ import {ChevronDown, ChevronUp,} from "lucide-react";
 import type {OrderListType} from "@types-lib";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
 import OrderProductItem from "@admin-pages/orders/src/OrderProductItem.tsx";
+import useOrderEditStatus from "@hooks/useOrderEditStatus.tsx";
 
 interface Props {
     order: OrderListType;
+    onChangeStatus: (id: number, status: any) => void;
 }
 
-const OrdersPage: FC<Props> = ({order}) => {
+const OrdersPage: FC<Props> = ({order, onChangeStatus}) => {
     const [opened, setOpened] = useState(false);
 
     function toggleOpened() {
         setOpened(prevState => !prevState);
     }
 
-    const changeStatus = (status: OrderListType['status']) => {
-
+    const {handle} = useOrderEditStatus(order.id);
+    const changeStatus = async (status: OrderListType['status']) => {
+        const response = await handle(status);
+        if (response) {
+            onChangeStatus(order.id, status);
+        }
     };
 
     const totalPrice = useMemo(() => {
@@ -53,7 +59,7 @@ const OrdersPage: FC<Props> = ({order}) => {
 
                 <OrderActions>
                     <StatusSelect
-                        value={order.status}
+                        defaultValue={order.status}
                         onChange={e =>
                             changeStatus(e.target.value as OrderListType['status'])
                         }

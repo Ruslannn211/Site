@@ -1,206 +1,115 @@
-import {type FC} from "react";
+import {type FC, useState} from "react";
 import styled from "styled-components";
 import {Star} from "lucide-react";
+import type {ProductRatingType, ProductType} from "@types-lib";
+import {buildClientName} from "@helpers/buildClientName.ts";
+import {useStore} from "@store";
+import ReviewCreateModal from "@pages/products/product-modal/src/reviews/ReviewCreateModal.tsx";
 
-const REVIEWS = [
-    {
-        id: 1,
-        name: "Олександр",
-        rating: 5,
-        text: "Дуже швидка доставка та якісний товар. Все прийшло добре запаковане.",
-        date: "12 травня 2026",
-    },
+interface Props {
+    product: ProductType;
+    addRating: (r: ProductRatingType) => void;
+}
 
-    {
-        id: 2,
-        name: "Марина",
-        rating: 4,
-        text: "Магазин сподобався, підтримка відповідає швидко. Єдине — доставка затрималась на день.",
-        date: "8 травня 2026",
-    },
+const ReviewsComponent: FC<Props> = (props) => {
+    const {product, addRating} = props;
 
-    {
-        id: 3,
-        name: "Іван",
-        rating: 5,
-        text: "Замовляю вже не вперше. Ціни приємні, товар оригінальний.",
-        date: "3 травня 2026",
-    },
+    const {user} = useStore(store => store.global.user);
+    const [open, setOpen] = useState(false);
 
-    {
-        id: 4,
-        name: "Катерина",
-        rating: 5,
-        text: "Все супер. Ноутбук працює ідеально, магазин рекомендую.",
-        date: "29 квітня 2026",
-    },
-
-    {
-        id: 5,
-        name: "Катерина",
-        rating: 5,
-        text: "Все супер. Ноутбук працює ідеально, магазин рекомендую.",
-        date: "29 квітня 2026",
-    },
-
-    {
-        id: 6,
-        name: "Катерина",
-        rating: 5,
-        text: "Все супер. Ноутбук працює ідеально, магазин рекомендую.",
-        date: "29 квітня 2026",
-    },
-];
-
-const ReviewsComponent: FC = () => {
-    const average =
-        REVIEWS.reduce(
-            (acc, review) => acc + review.rating,
-            0
-        ) / REVIEWS.length;
-
+    const average = product.ratings.reduce((acc, review) => acc + review.rating, 0) / product.ratings.length;
     const stars = [5, 4, 3, 2, 1];
 
     return (
-        <Container>
-            <Left>
-                <StatsCard>
-                    <StatsTop>
-                        <AverageValue>
-                            {average.toFixed(1)}
-                        </AverageValue>
+        <>
+            <Container>
+                <Left>
+                    <StatsCard>
+                        <StatsTop>
+                            <AverageValue>
+                                {average.toFixed(1)}
+                            </AverageValue>
 
-                        <StarsRow>
-                            {Array.from({
-                                length: 5,
-                            }).map((_, index) => (
-                                <StyledStar
-                                    key={index}
-                                    size={18}
-                                    filled={
-                                        index <
-                                        Math.round(
-                                            average
-                                        )
-                                    }
-                                />
-                            ))}
-                        </StarsRow>
+                            <StarsRow>
+                                {Array.from({length: 5,}).map((_, index) => (
+                                    <StyledStar key={index} size={18} filled={index < Math.round(average)}/>
+                                ))}
+                            </StarsRow>
 
-                        <ReviewsCount>
-                            {REVIEWS.length} відгуків
-                        </ReviewsCount>
-                    </StatsTop>
+                            <ReviewsCount>
+                                {product.ratings.length} відгуків
+                            </ReviewsCount>
+                        </StatsTop>
 
-                    <RatingList>
-                        {stars.map(star => {
-                            const count =
-                                REVIEWS.filter(
-                                    review =>
-                                        review.rating ===
-                                        star
-                                ).length;
+                        <RatingList>
+                            {stars.map(star => {
+                                const count = product.ratings.filter(review => review.rating === star).length;
+                                const percent = (count / product.ratings.length) * 100;
 
-                            const percent =
-                                (count /
-                                    REVIEWS.length) *
-                                100;
+                                return (
+                                    <RatingRow key={star}>
+                                        <RatingLabel>
+                                            {star}
+                                            <Star size={13} fill="#facc15" color="#facc15"/>
+                                        </RatingLabel>
 
-                            return (
-                                <RatingRow
-                                    key={star}
-                                >
-                                    <RatingLabel>
-                                        {star}
-                                        <Star
-                                            size={13}
-                                            fill="#facc15"
-                                            color="#facc15"
-                                        />
-                                    </RatingLabel>
+                                        <RatingBar>
+                                            <RatingProgress width={percent}/>
+                                        </RatingBar>
+                                        <RatingCount>{count}</RatingCount>
+                                    </RatingRow>
+                                );
+                            })}
+                        </RatingList>
+                    </StatsCard>
+                </Left>
 
-                                    <RatingBar>
-                                        <RatingProgress
-                                            width={
-                                                percent
-                                            }
-                                        />
-                                    </RatingBar>
+                <Right>
+                    <RightTop>
+                        <RightHeader>Відгуки покупців</RightHeader>
 
-                                    <RatingCount>
-                                        {count}
-                                    </RatingCount>
-                                </RatingRow>
-                            );
-                        })}
-                    </RatingList>
-                </StatsCard>
-            </Left>
+                        <WriteButton disabled={!user} onClick={() => setOpen(true)}>
+                            {user ? "Написати відгук" : "Авторизуйтесь, щоб залишити відгук"}
+                        </WriteButton>
+                    </RightTop>
 
-            <Right>
-                <RightHeader>
-                    Відгуки покупців
-                </RightHeader>
+                    <ReviewsList>
+                        {product.ratings.map(review => (
+                            <ReviewCard key={review.id}>
+                                <ReviewTop>
+                                    <ReviewUser>
+                                        <Avatar>
+                                            {review.user.first_name[0]}
+                                        </Avatar>
 
-                <ReviewsList>
-                    {REVIEWS.map(review => (
-                        <ReviewCard
-                            key={review.id}
-                        >
-                            <ReviewTop>
-                                <ReviewUser>
-                                    <Avatar>
-                                        {review.name[0]}
-                                    </Avatar>
+                                        <UserInfo>
+                                            <UserName>{buildClientName(review.user)}</UserName>
+                                            <ReviewDate>{review.createdAt}</ReviewDate>
+                                        </UserInfo>
+                                    </ReviewUser>
 
-                                    <UserInfo>
-                                        <UserName>
-                                            {
-                                                review.name
-                                            }
-                                        </UserName>
+                                    <StarsRow>
+                                        {Array.from({
+                                            length: 5,
+                                        }).map((_, index) => (
+                                                <StyledStar key={index} size={15} filled={index < review.rating}/>
+                                            )
+                                        )}
+                                    </StarsRow>
+                                </ReviewTop>
 
-                                        <ReviewDate>
-                                            {
-                                                review.date
-                                            }
-                                        </ReviewDate>
-                                    </UserInfo>
-                                </ReviewUser>
-
-                                <StarsRow>
-                                    {Array.from({
-                                        length: 5,
-                                    }).map(
-                                        (
-                                            _,
-                                            index
-                                        ) => (
-                                            <StyledStar
-                                                key={
-                                                    index
-                                                }
-                                                size={
-                                                    15
-                                                }
-                                                filled={
-                                                    index <
-                                                    review.rating
-                                                }
-                                            />
-                                        )
-                                    )}
-                                </StarsRow>
-                            </ReviewTop>
-
-                            <ReviewText>
-                                {review.text}
-                            </ReviewText>
-                        </ReviewCard>
-                    ))}
-                </ReviewsList>
-            </Right>
-        </Container>
+                                <ReviewText>
+                                    {review.comment ?? ""}
+                                </ReviewText>
+                            </ReviewCard>
+                        ))}
+                    </ReviewsList>
+                </Right>
+            </Container>
+            <ReviewCreateModal open={open} onClose={() => setOpen(false)}
+                               productId={product.id} addRating={addRating}
+            />
+        </>
     );
 };
 
@@ -218,7 +127,7 @@ const Container = styled.div`
     align-items: start;
     background: white;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 6px 20px rgba(15,23,42,0.04);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
     border-radius: 18px;
     padding: 35px 22px;
     margin-top: 10px;
@@ -232,6 +141,54 @@ const Left = styled.div`
 const Right = styled.div`
     display: flex;
     flex-direction: column;
+`;
+
+const RightTop = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+`;
+
+const WriteButton = styled.button`
+    height: 42px;
+
+    padding: 0 18px;
+
+    border-radius: 12px;
+
+    border: none;
+
+    background:
+            linear-gradient(
+                    135deg,
+                    #16a34a 0%,
+                    #22c55e 100%
+            );
+
+    color: white;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: 0.16s ease;
+
+    box-shadow:
+            0 10px 24px rgba(34,197,94,0.18);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    &:disabled {
+        opacity: 0.45;
+
+        cursor: not-allowed;
+
+        box-shadow: none;
+    }
 `;
 
 const StatsCard = styled.div`
@@ -319,18 +276,17 @@ const RatingBar = styled.div`
 `;
 
 const RatingProgress = styled.div<{ width: number }>`
-    width: ${({ width }) => width}%;
+    width: ${({width}) => width}%;
 
     height: 100%;
 
     border-radius: 999px;
 
-    background:
-            linear-gradient(
-                    90deg,
-                    #facc15 0%,
-                    #f59e0b 100%
-            );
+    background: linear-gradient(
+            90deg,
+            #facc15 0%,
+            #f59e0b 100%
+    );
 `;
 
 const RatingCount = styled.div`
@@ -390,12 +346,11 @@ const Avatar = styled.div`
 
     border-radius: 14px;
 
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
+    background: linear-gradient(
+            135deg,
+            #16a34a 0%,
+            #22c55e 100%
+    );
 
     color: white;
 
@@ -406,8 +361,7 @@ const Avatar = styled.div`
     font-size: 18px;
     font-weight: 900;
 
-    box-shadow:
-            0 10px 20px rgba(34,197,94,0.18);
+    box-shadow: 0 10px 20px rgba(34, 197, 94, 0.18);
 `;
 
 const UserInfo = styled.div`
@@ -442,9 +396,9 @@ const ReviewText = styled.div`
 const StyledStar = styled(Star)<{
     filled?: boolean;
 }>`
-    color: ${({ filled }) =>
-    filled ? "#facc15" : "#cbd5e1"};
+    color: ${({filled}) =>
+            filled ? "#facc15" : "#cbd5e1"};
 
-    fill: ${({ filled }) =>
-    filled ? "#facc15" : "transparent"};
+    fill: ${({filled}) =>
+            filled ? "#facc15" : "transparent"};
 `;

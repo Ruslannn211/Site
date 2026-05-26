@@ -1,37 +1,13 @@
-import {type FC, useMemo, useState} from "react";
+import {type FC, useState} from "react";
 import styled from "styled-components";
-import {
-    Check,
-    Smartphone,
-    Wrench,
-    ShieldCheck,
-    X,
-} from "lucide-react";
+import {Smartphone, Wrench, ShieldCheck,} from "lucide-react";
 import useRepairsPriceList from "@hooks/useRepairsPriceList.tsx";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
+import RepairModal from "@pages/repair/repair-modal/RepairModal.tsx";
 
 const RepairPage: FC = () => {
     const [opened, setOpened] = useState(false);
     const {list: repairsPrice} = useRepairsPriceList();
-
-    const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
-
-    const totalPrice = useMemo(() => {
-        return repairsPrice
-            .filter(option =>
-                selectedOptions.includes(option.id)
-            )
-            .reduce((acc, option) =>
-                acc + option.price, 0);
-    }, [selectedOptions]);
-
-    const toggleOption = (id: number) => {
-        setSelectedOptions(prev =>
-            prev.includes(id)
-                ? prev.filter(item => item !== id)
-                : [...prev, id]
-        );
-    };
 
     return (
         <>
@@ -43,30 +19,20 @@ const RepairPage: FC = () => {
                         </HeroIcon>
 
                         <HeroText>
-                            <HeroTitle>
-                                Ремонт смартфонів та техніки
-                            </HeroTitle>
-
+                            <HeroTitle>Ремонт смартфонів та техніки</HeroTitle>
                             <HeroDescription>
-                                Швидкий та якісний ремонт телефонів,
-                                планшетів, ноутбуків та іншої техніки
-                                з гарантією на виконані роботи.
+                                Швидкий та якісний ремонт телефонів, планшетів, ноутбуків та іншої техніки з гарантією на виконані роботи.
                             </HeroDescription>
                         </HeroText>
 
-                        <HeroButton
-                            onClick={() => setOpened(true)}
-                        >
+                        <HeroButton onClick={() => setOpened(true)}>
                             Замовити ремонт
                         </HeroButton>
                     </HeroContent>
                 </Hero>
 
                 <PriceList>
-                    <SectionTitle>
-                        Прайс-лист ремонту
-                    </SectionTitle>
-
+                    <SectionTitle>Прайс-лист ремонту</SectionTitle>
                     <RepairGrid>
                         {repairsPrice.map(option => (
                             <RepairCard key={option.id}>
@@ -74,24 +40,13 @@ const RepairPage: FC = () => {
                                     <RepairIcon>
                                         <Smartphone size={18} />
                                     </RepairIcon>
-
-                                    <RepairPrice>
-                                        від {buildNumberFormat(option.price)} ₴
-                                    </RepairPrice>
+                                    <RepairPrice>від {buildNumberFormat(option.price)} ₴</RepairPrice>
                                 </RepairTop>
-
-                                <RepairTitle>
-                                    {option.name}
-                                </RepairTitle>
-
-                                <RepairDescription>
-                                    {option.description}
-                                </RepairDescription>
-
+                                <RepairTitle>{option.name}</RepairTitle>
+                                <RepairDescription>{option.description}</RepairDescription>
                                 <RepairBottom>
                                     <RepairBadge>
                                         <ShieldCheck size={14} />
-
                                         Гарантія
                                     </RepairBadge>
                                 </RepairBottom>
@@ -101,133 +56,7 @@ const RepairPage: FC = () => {
                 </PriceList>
             </Container>
 
-            <Overlay open={opened}>
-                <Modal>
-                    <ModalHeader>
-                        <ModalTitle>
-                            Замовлення ремонту
-                        </ModalTitle>
-
-                        <CloseButton
-                            onClick={() => setOpened(false)}
-                        >
-                            <X size={18} />
-                        </CloseButton>
-                    </ModalHeader>
-
-                    <Form>
-                        <Block>
-                            <BlockTitle>
-                                Оберіть послуги ремонту
-                            </BlockTitle>
-
-                            <OptionsGrid>
-                                {repairsPrice.map(option => {
-                                    const active =
-                                        selectedOptions.includes(
-                                            option.id
-                                        );
-
-                                    return (
-                                        <OptionCard
-                                            key={option.id}
-                                            active={active}
-                                            onClick={() =>
-                                                toggleOption(option.id)
-                                            }
-                                        >
-                                            <OptionCheck active={active}>
-                                                <Check size={12} />
-                                            </OptionCheck>
-
-                                            <OptionInfo>
-                                                <OptionTitle>
-                                                    {option.name}
-                                                </OptionTitle>
-
-                                                <OptionPrice>
-                                                    {option.price.toLocaleString()} ₴
-                                                </OptionPrice>
-                                            </OptionInfo>
-                                        </OptionCard>
-                                    );
-                                })}
-                            </OptionsGrid>
-                        </Block>
-
-                        <InputsGrid>
-                            <InputBlock>
-                                <Label>
-                                    ПІБ
-                                </Label>
-
-                                <Input
-                                    placeholder={"Ваше ім’я"}
-                                />
-                            </InputBlock>
-
-                            <InputBlock>
-                                <Label>
-                                    Номер телефону
-                                </Label>
-
-                                <Input
-                                    placeholder={"+380"}
-                                />
-                            </InputBlock>
-
-                            <InputBlock full>
-                                <Label>
-                                    Модель телефону
-                                </Label>
-
-                                <Input
-                                    placeholder={"Наприклад iPhone 15 Pro Max"}
-                                />
-                            </InputBlock>
-
-                            <InputBlock full>
-                                <Label>
-                                    Опис поломки
-                                </Label>
-
-                                <Textarea
-                                    placeholder={
-                                        "Опишіть проблему або симптоми..."
-                                    }
-                                />
-                            </InputBlock>
-                        </InputsGrid>
-
-                        <Summary>
-                            <SummaryLeft>
-                                <SummaryLabel>
-                                    Загальна вартість ремонту
-                                </SummaryLabel>
-
-                                <SummaryDescription>
-                                    Без урахування доставки та
-                                    додаткової діагностики
-                                </SummaryDescription>
-                            </SummaryLeft>
-
-                            <SummaryPrice>
-                                {totalPrice.toLocaleString()} ₴
-                            </SummaryPrice>
-                        </Summary>
-
-                        <SubmitButton>
-                            Підтвердити замовлення ремонту
-                        </SubmitButton>
-
-                        <BottomText>
-                            Після відправки заявки менеджер
-                            звʼяжеться з вами для уточнення
-                            деталей ремонту.
-                        </BottomText>
-                    </Form>
-                </Modal>
-            </Overlay>
+            <RepairModal open={opened} onClose={() => setOpened(false)} price={repairsPrice} />
         </>
     );
 };
@@ -462,374 +291,4 @@ const RepairBadge = styled.div`
 
     font-size: 13px;
     font-weight: 800;
-`;
-
-const Overlay = styled.div<{ open: boolean }>`
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 200;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 24px;
-
-    background: rgba(15,23,42,0.38);
-
-    backdrop-filter: blur(6px);
-
-    opacity: ${({ open }) => open ? 1 : 0};
-
-    pointer-events: ${({ open }) =>
-    open ? "all" : "none"};
-
-    transition: 0.18s ease;
-`;
-
-const Modal = styled.div`
-    width: 100%;
-    max-width: 860px;
-
-    max-height: calc(100vh - 48px);
-
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-
-    border-radius: 24px;
-
-    background: white;
-
-    border: 1px solid #e2e8f0;
-
-    box-shadow:
-            0 30px 60px rgba(15,23,42,0.20);
-
-    box-sizing: border-box;
-`;
-
-const ModalHeader = styled.div`
-    position: sticky;
-    top: 0;
-
-    z-index: 2;
-
-    padding: 10px 24px;
-
-    background: rgba(255,255,255,0.94);
-
-    backdrop-filter: blur(12px);
-
-    border-bottom: 1px solid #edf2f7;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    box-sizing: border-box;
-`;
-
-const ModalTitle = styled.div`
-    font-size: 26px;
-    font-weight: 900;
-
-    color: #0f172a;
-`;
-
-const CloseButton = styled.button`
-    width: 42px;
-    height: 42px;
-
-    border-radius: 12px;
-
-    border: 1px solid #e2e8f0;
-
-    background: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-`;
-
-const Form = styled.div`
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding: 24px;
-
-    box-sizing: border-box;
-
-    min-height: 0;
-`;
-
-const Block = styled.div`
-    margin-bottom: 28px;
-`;
-
-const BlockTitle = styled.div`
-    font-size: 18px;
-    font-weight: 800;
-
-    color: #0f172a;
-
-    margin-bottom: 14px;
-`;
-
-const OptionsGrid = styled.div`
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 12px;
-`;
-
-const OptionCard = styled.button<{ active: boolean }>`
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    border: 1px solid ${({ active }) =>
-    active ? "#22c55e" : "#e2e8f0"};
-
-    background: ${({ active }) =>
-    active
-        ? "rgba(34,197,94,0.06)"
-        : "white"};
-
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-
-    cursor: pointer;
-
-    transition: 0.16s ease;
-
-    box-sizing: border-box;
-`;
-
-const OptionCheck = styled.div<{ active: boolean }>`
-    width: 20px;
-    height: 20px;
-
-    min-width: 20px;
-
-    border-radius: 6px;
-
-    border: 1px solid ${({ active }) =>
-    active ? "#22c55e" : "#cbd5e1"};
-
-    background: ${({ active }) =>
-    active ? "#22c55e" : "white"};
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
-
-const OptionInfo = styled.div`
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-`;
-
-const OptionTitle = styled.div`
-    text-align: start;
-    font-size: 14px;
-    font-weight: 700;
-
-    color: #0f172a;
-`;
-
-const OptionPrice = styled.div`
-    text-align: start;
-    margin-top: 6px;
-
-    font-size: 13px;
-    font-weight: 800;
-
-    color: #16a34a;
-`;
-
-const InputsGrid = styled.div`
-    margin-top: -10px;
-    display: grid;
-
-    grid-template-columns: repeat(2, 1fr);
-
-    gap: 16px;
-`;
-
-const InputBlock = styled.div<{ full?: boolean }>`
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
-    grid-column: ${({ full }) =>
-    full ? "1 / -1" : "auto"};
-`;
-
-const Label = styled.div`
-    font-size: 13px;
-    font-weight: 700;
-
-    color: #0f172a;
-`;
-
-const Input = styled.input`
-    width: 100%;
-
-    height: 50px;
-
-    padding: 0 16px;
-
-    border-radius: 14px;
-
-    border: 1px solid #dbe4ee;
-    font-family: var(--font-ui);
-
-    outline: none;
-
-    background: #f8fafc;
-
-    font-size: 14px;
-
-    transition: 0.16s ease;
-
-    box-sizing: border-box;
-
-    &:focus {
-        border-color: #94a3b8;
-        background: white;
-    }
-`;
-
-const Textarea = styled.textarea`
-    width: 100%;
-
-    min-height: 120px;
-
-    resize: vertical;
-    font-family: var(--font-ui);
-
-    padding: 14px 16px;
-
-    border-radius: 14px;
-
-    border: 1px solid #dbe4ee;
-
-    outline: none;
-
-    background: #f8fafc;
-
-    font-size: 14px;
-    line-height: 1.7;
-
-    transition: 0.16s ease;
-
-    box-sizing: border-box;
-
-    &:focus {
-        border-color: #94a3b8;
-        background: white;
-    }
-`;
-
-const Summary = styled.div`
-    margin-top: 28px;
-
-    padding: 20px;
-
-    border-radius: 18px;
-
-    background: #f8fafc;
-
-    border: 1px solid #edf2f7;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-`;
-
-const SummaryLeft = styled.div`
-    flex: 1;
-`;
-
-const SummaryLabel = styled.div`
-    font-size: 18px;
-    font-weight: 800;
-
-    color: #0f172a;
-`;
-
-const SummaryDescription = styled.div`
-    margin-top: 6px;
-
-    font-size: 13px;
-    line-height: 1.6;
-
-    color: #64748b;
-`;
-
-const SummaryPrice = styled.div`
-    font-size: 38px;
-    font-weight: 900;
-
-    letter-spacing: -0.05em;
-
-    color: #16a34a;
-`;
-
-const SubmitButton = styled.button`
-    width: 100%;
-
-    height: 58px;
-
-    margin-top: 22px;
-
-    border: none;
-    border-radius: 16px;
-
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
-
-    color: white;
-
-    font-size: 15px;
-    font-weight: 800;
-
-    cursor: pointer;
-
-    box-shadow:
-            0 14px 28px rgba(34,197,94,0.22);
-
-    transition: 0.16s ease;
-
-    &:hover {
-        transform: translateY(-1px);
-    }
-`;
-
-const BottomText = styled.div`
-    margin-top: 14px;
-
-    text-align: center;
-
-    font-size: 13px;
-    line-height: 1.7;
-
-    color: #64748b;
 `;

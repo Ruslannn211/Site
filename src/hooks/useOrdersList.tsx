@@ -21,7 +21,7 @@ const useOrdersList = () => {
         handle();
     }, []);
 
-    return {list, loading};
+    return {list, loading, setList};
 };
 
 export default useOrdersList;

@@ -1,29 +1,44 @@
-import {type FC, useMemo, useState} from "react";
+import {type FC, useCallback, useMemo, useState} from "react";
 import styled from "styled-components";
-import {
-    Check,
-    Smartphone,
-    Wrench,
-    ShieldCheck,
-    X,
-} from "lucide-react";
-import useRepairsPriceList from "@hooks/useRepairsPriceList.tsx";
-import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
+import {Check, X,} from "lucide-react";
+import type {RepairPriceType} from "@types-lib";
+import PhoneInput from "@pages/repair/repair-modal/src/PhoneInput.tsx";
+import {useStore} from "@store";
+import {buildClientName} from "@helpers/buildClientName.ts";
+import useRepairOrder from "@hooks/useRepairOrder.tsx";
+import Spinner from "@components/ui/Spinner.tsx";
 
-const RepairPage: FC = () => {
-    const [opened, setOpened] = useState(false);
-    const {list: repairsPrice} = useRepairsPriceList();
+interface Props {
+    open: boolean;
+    onClose: () => void;
+    price: RepairPriceType[];
+}
 
+export type FormRepairOrderType = {
+    client_name: string;
+    phone_number: string;
+    phone_model: string;
+    description: string | null;
+}
+
+const RepairModal: FC<Props> = (props) => {
+    const {open, onClose, price} = props;
     const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
 
+    const {user} = useStore(store => store.global.user);
+
+    const [form, setForm] = useState<FormRepairOrderType>({
+        client_name: user ? buildClientName(user) : "", phone_model: "", phone_number: user?.phone_number ?? "", description: null
+    });
+
+    const update = useCallback((patch: Partial<FormRepairOrderType>) => {
+        setForm(prev => ({...prev, ...patch}));
+    }, [setForm]);
+
     const totalPrice = useMemo(() => {
-        return repairsPrice
-            .filter(option =>
-                selectedOptions.includes(option.id)
-            )
-            .reduce((acc, option) =>
-                acc + option.price, 0);
-    }, [selectedOptions]);
+        return price.filter(option => selectedOptions.includes(option.id))
+            .reduce((acc, option) => acc + option.price, 0);
+    }, [selectedOptions, price]);
 
     const toggleOption = (id: number) => {
         setSelectedOptions(prev =>
@@ -33,436 +48,119 @@ const RepairPage: FC = () => {
         );
     };
 
+    const isActive = form.client_name.trim().length > 0 && form.phone_number.length > 0 && form.phone_model.length > 0 && selectedOptions.length > 0;
+
+    const {handle: createOrder, loading} = useRepairOrder();
+    async function submit() {
+        const response = await createOrder({...form, price_selected: selectedOptions});
+        if (response) {
+            onClose();
+        }
+    }
+
     return (
-        <>
-            <Container>
-                <Hero>
-                    <HeroContent>
-                        <HeroIcon>
-                            <Wrench size={28} />
-                        </HeroIcon>
+        <Overlay open={open}>
+            <Modal>
+                <ModalHeader>
+                    <ModalTitle>Замовлення ремонту</ModalTitle>
+                    <CloseButton onClick={onClose}>
+                        <X size={18} />
+                    </CloseButton>
+                </ModalHeader>
+                <Form>
+                    <Block>
+                        <BlockTitle>Оберіть послуги ремонту</BlockTitle>
+                        <OptionsGrid>
+                            {price.map(option => {
+                                const active = selectedOptions.includes(option.id);
+                                return (
+                                    <OptionCard
+                                        key={option.id}
+                                        active={active}
+                                        onClick={() => toggleOption(option.id)}
+                                    >
+                                        <OptionCheck active={active}>
+                                            <Check size={12} />
+                                        </OptionCheck>
 
-                        <HeroText>
-                            <HeroTitle>
-                                Ремонт смартфонів та техніки
-                            </HeroTitle>
+                                        <OptionInfo>
+                                            <OptionTitle>{option.name}</OptionTitle>
+                                            <OptionPrice>{option.price.toLocaleString()} ₴</OptionPrice>
+                                        </OptionInfo>
+                                    </OptionCard>
+                                );
+                            })}
+                        </OptionsGrid>
+                    </Block>
 
-                            <HeroDescription>
-                                Швидкий та якісний ремонт телефонів,
-                                планшетів, ноутбуків та іншої техніки
-                                з гарантією на виконані роботи.
-                            </HeroDescription>
-                        </HeroText>
+                    <InputsGrid>
+                        <InputBlock>
+                            <Label>ПІБ</Label>
+                            <Input placeholder={"Ваше ім’я"}
+                                   onChange={e => {
+                                       update({client_name: e.target.value})
+                                   }} value={form.client_name}
+                            />
+                        </InputBlock>
 
-                        <HeroButton
-                            onClick={() => setOpened(true)}
-                        >
-                            Замовити ремонт
-                        </HeroButton>
-                    </HeroContent>
-                </Hero>
+                        <InputBlock>
+                            <Label>Номер телефону</Label>
+                            <PhoneInput placeholder={"+380"}
+                                        onChange={phone_number => {
+                                            update({phone_number})
+                                        }} value={form.phone_number}
+                            />
+                        </InputBlock>
 
-                <PriceList>
-                    <SectionTitle>
-                        Прайс-лист ремонту
-                    </SectionTitle>
+                        <InputBlock full>
+                            <Label>Назва/Модель пристрою</Label>
+                            <Input placeholder={"Наприклад iPhone 15 Pro Max"}
+                                   onChange={e => {
+                                       update({phone_model: e.target.value})
+                                   }} value={form.phone_model}
+                            />
+                        </InputBlock>
 
-                    <RepairGrid>
-                        {repairsPrice.map(option => (
-                            <RepairCard key={option.id}>
-                                <RepairTop>
-                                    <RepairIcon>
-                                        <Smartphone size={18} />
-                                    </RepairIcon>
+                        <InputBlock full>
+                            <Label>Опис поломки</Label>
+                            <Textarea placeholder={"Опишіть проблему або симптоми..."}
+                                      onChange={e => {
+                                          update({description: e.target.value})
+                                      }} value={form.description ?? ""}
+                            />
+                        </InputBlock>
+                    </InputsGrid>
 
-                                    <RepairPrice>
-                                        від {buildNumberFormat(option.price)} ₴
-                                    </RepairPrice>
-                                </RepairTop>
+                    <Summary>
+                        <SummaryLeft>
+                            <SummaryLabel>
+                                Загальна вартість ремонту
+                            </SummaryLabel>
 
-                                <RepairTitle>
-                                    {option.name}
-                                </RepairTitle>
+                            <SummaryDescription>
+                                Без урахування доставки та додаткової діагностики
+                            </SummaryDescription>
+                        </SummaryLeft>
 
-                                <RepairDescription>
-                                    {option.description}
-                                </RepairDescription>
+                        <SummaryPrice>
+                            {totalPrice.toLocaleString()} ₴
+                        </SummaryPrice>
+                    </Summary>
 
-                                <RepairBottom>
-                                    <RepairBadge>
-                                        <ShieldCheck size={14} />
+                    <SubmitButton disabled={!isActive || loading} onClick={submit}>
+                        {loading ? (<><Spinner />Надсилаємо ремонт...</>) : ("Підтвердити замовлення ремонту")}
+                    </SubmitButton>
 
-                                        Гарантія
-                                    </RepairBadge>
-                                </RepairBottom>
-                            </RepairCard>
-                        ))}
-                    </RepairGrid>
-                </PriceList>
-            </Container>
-
-            <Overlay open={opened}>
-                <Modal>
-                    <ModalHeader>
-                        <ModalTitle>
-                            Замовлення ремонту
-                        </ModalTitle>
-
-                        <CloseButton
-                            onClick={() => setOpened(false)}
-                        >
-                            <X size={18} />
-                        </CloseButton>
-                    </ModalHeader>
-
-                    <Form>
-                        <Block>
-                            <BlockTitle>
-                                Оберіть послуги ремонту
-                            </BlockTitle>
-
-                            <OptionsGrid>
-                                {repairsPrice.map(option => {
-                                    const active =
-                                        selectedOptions.includes(
-                                            option.id
-                                        );
-
-                                    return (
-                                        <OptionCard
-                                            key={option.id}
-                                            active={active}
-                                            onClick={() =>
-                                                toggleOption(option.id)
-                                            }
-                                        >
-                                            <OptionCheck active={active}>
-                                                <Check size={12} />
-                                            </OptionCheck>
-
-                                            <OptionInfo>
-                                                <OptionTitle>
-                                                    {option.name}
-                                                </OptionTitle>
-
-                                                <OptionPrice>
-                                                    {option.price.toLocaleString()} ₴
-                                                </OptionPrice>
-                                            </OptionInfo>
-                                        </OptionCard>
-                                    );
-                                })}
-                            </OptionsGrid>
-                        </Block>
-
-                        <InputsGrid>
-                            <InputBlock>
-                                <Label>
-                                    ПІБ
-                                </Label>
-
-                                <Input
-                                    placeholder={"Ваше ім’я"}
-                                />
-                            </InputBlock>
-
-                            <InputBlock>
-                                <Label>
-                                    Номер телефону
-                                </Label>
-
-                                <Input
-                                    placeholder={"+380"}
-                                />
-                            </InputBlock>
-
-                            <InputBlock full>
-                                <Label>
-                                    Модель телефону
-                                </Label>
-
-                                <Input
-                                    placeholder={"Наприклад iPhone 15 Pro Max"}
-                                />
-                            </InputBlock>
-
-                            <InputBlock full>
-                                <Label>
-                                    Опис поломки
-                                </Label>
-
-                                <Textarea
-                                    placeholder={
-                                        "Опишіть проблему або симптоми..."
-                                    }
-                                />
-                            </InputBlock>
-                        </InputsGrid>
-
-                        <Summary>
-                            <SummaryLeft>
-                                <SummaryLabel>
-                                    Загальна вартість ремонту
-                                </SummaryLabel>
-
-                                <SummaryDescription>
-                                    Без урахування доставки та
-                                    додаткової діагностики
-                                </SummaryDescription>
-                            </SummaryLeft>
-
-                            <SummaryPrice>
-                                {totalPrice.toLocaleString()} ₴
-                            </SummaryPrice>
-                        </Summary>
-
-                        <SubmitButton>
-                            Підтвердити замовлення ремонту
-                        </SubmitButton>
-
-                        <BottomText>
-                            Після відправки заявки менеджер
-                            звʼяжеться з вами для уточнення
-                            деталей ремонту.
-                        </BottomText>
-                    </Form>
-                </Modal>
-            </Overlay>
-        </>
+                    <BottomText>
+                        Після відправки заявки менеджер звʼяжеться з вами для уточнення деталей ремонту.
+                    </BottomText>
+                </Form>
+            </Modal>
+        </Overlay>
     );
 };
 
-export default RepairPage;
-
-const Container = styled.div`
-    width: 100%;
-
-    padding: 18px;
-
-    box-sizing: border-box;
-`;
-
-const Hero = styled.div`
-    border-radius: 22px;
-
-    overflow: hidden;
-
-    background:
-            linear-gradient(
-                    135deg,
-                    #111827 0%,
-                    #1f2937 100%
-            );
-
-    box-shadow:
-            0 18px 40px rgba(15,23,42,0.14);
-`;
-
-const HeroContent = styled.div`
-    min-height: 220px;
-
-    padding: 34px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-
-    box-sizing: border-box;
-`;
-
-const HeroIcon = styled.div`
-    width: 74px;
-    height: 74px;
-
-    min-width: 74px;
-
-    border-radius: 20px;
-
-    background: rgba(255,255,255,0.10);
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
-
-const HeroText = styled.div`
-    flex: 1;
-`;
-
-const HeroTitle = styled.div`
-    font-size: 42px;
-    font-weight: 900;
-
-    line-height: 1.05;
-
-    letter-spacing: -0.05em;
-
-    color: white;
-`;
-
-const HeroDescription = styled.div`
-    max-width: 720px;
-
-    margin-top: 14px;
-
-    font-size: 16px;
-    line-height: 1.7;
-
-    color: rgba(255,255,255,0.74);
-`;
-
-const HeroButton = styled.button`
-    height: 56px;
-
-    padding: 0 28px;
-
-    border: none;
-    border-radius: 16px;
-
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
-
-    color: white;
-
-    font-size: 15px;
-    font-weight: 800;
-
-    cursor: pointer;
-
-    transition: 0.16s ease;
-
-    box-shadow:
-            0 12px 26px rgba(34,197,94,0.24);
-
-    &:hover {
-        transform: translateY(-1px);
-    }
-`;
-
-const PriceList = styled.div`
-    margin-top: 24px;
-`;
-
-const SectionTitle = styled.div`
-    font-size: 28px;
-    font-weight: 900;
-
-    letter-spacing: -0.04em;
-
-    color: #0f172a;
-`;
-
-const RepairGrid = styled.div`
-    display: grid;
-
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-
-    gap: 16px;
-
-    margin-top: 18px;
-`;
-
-const RepairCard = styled.div`
-    padding: 20px;
-
-    border-radius: 18px;
-
-    background: white;
-
-    border: 1px solid #e2e8f0;
-
-    box-shadow:
-            0 8px 24px rgba(15,23,42,0.04);
-
-    transition: 0.18s ease;
-
-    &:hover {
-        transform: translateY(-2px);
-
-        box-shadow:
-                0 16px 30px rgba(15,23,42,0.08);
-    }
-`;
-
-const RepairTop = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-`;
-
-const RepairIcon = styled.div`
-    width: 42px;
-    height: 42px;
-
-    border-radius: 12px;
-
-    background: #f8fafc;
-
-    border: 1px solid #e2e8f0;
-
-    color: #0f172a;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
-
-const RepairPrice = styled.div`
-    font-size: 20px;
-    font-weight: 900;
-
-    color: #16a34a;
-`;
-
-const RepairTitle = styled.div`
-    margin-top: 18px;
-
-    font-size: 18px;
-    font-weight: 800;
-
-    color: #0f172a;
-`;
-
-const RepairDescription = styled.div`
-    margin-top: 8px;
-
-    font-size: 14px;
-    line-height: 1.7;
-
-    color: #64748b;
-`;
-
-const RepairBottom = styled.div`
-    margin-top: 18px;
-`;
-
-const RepairBadge = styled.div`
-    width: fit-content;
-
-    height: 32px;
-
-    padding: 0 12px;
-
-    border-radius: 999px;
-
-    background: rgba(34,197,94,0.10);
-
-    color: #16a34a;
-
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    font-size: 13px;
-    font-weight: 800;
-`;
+export default RepairModal;
 
 const Overlay = styled.div<{ open: boolean }>`
     position: fixed;
@@ -586,14 +284,14 @@ const OptionsGrid = styled.div`
 
     grid-template-columns: repeat(2, 1fr);
 
-    gap: 12px;
+    gap: 6px;
 `;
 
 const OptionCard = styled.button<{ active: boolean }>`
 
     padding: 14px;
 
-    border-radius: 16px;
+    border-radius: 8px;
 
     border: 1px solid ${({ active }) =>
     active ? "#22c55e" : "#e2e8f0"};
@@ -651,7 +349,7 @@ const OptionTitle = styled.div`
 
 const OptionPrice = styled.div`
     text-align: start;
-    margin-top: 6px;
+    margin-top: 3px;
 
     font-size: 13px;
     font-weight: 800;
@@ -794,33 +492,48 @@ const SubmitButton = styled.button`
 
     height: 58px;
 
-    margin-top: 22px;
+    margin-top: 24px;
 
     border: none;
-    border-radius: 16px;
+    border-radius: 18px;
 
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
+    background: linear-gradient(
+            135deg,
+            #16a34a 0%,
+            #22c55e 100%
+    );
 
     color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 
     font-size: 15px;
     font-weight: 800;
 
     cursor: pointer;
 
-    box-shadow:
-            0 14px 28px rgba(34,197,94,0.22);
+    box-shadow: 0 18px 30px rgba(34, 197, 94, 0.24);
 
     transition: 0.16s ease;
 
     &:hover {
         transform: translateY(-1px);
     }
+
+    ${p => p.disabled && `
+        cursor: not-allowed;
+        box-shadow: none;
+        background: linear-gradient(
+                135deg,#969f98 0%,#bdc9c2 100%
+        );
+        
+        &:hover {
+            transform: none;
+        }
+    `}
 `;
 
 const BottomText = styled.div`

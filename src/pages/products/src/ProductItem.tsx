@@ -64,16 +64,10 @@ const ProductItem: FC<Props> = (props) => {
                 <RatingRow>
                     <Stars>
                         <StarFill />
-                        {/*<RatingValue>
+                        <RatingValue>
                             {product.rating}
-                        </RatingValue>*/}
+                        </RatingValue>
                     </Stars>
-
-                    <Reviews>
-                        <MessageCircle size={12} />
-
-                        {/*{product.reviews}*/}
-                    </Reviews>
                 </RatingRow>
 
                 <PriceBlock>

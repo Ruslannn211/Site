@@ -9,20 +9,26 @@ import {
 import type {RepairOrderListType} from "@types-lib";
 import OrderPriceItem from "@admin-pages/repair/src/OrderPriceItem.tsx";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
+import useRepairOrderEditStatus from "@hooks/useRepairOrderEditStatus.tsx";
 
 interface Props {
     order: RepairOrderListType;
+    onChangeStatus: (id: number, status: any) => void;
 }
 
-const OrderItem: FC<Props> = ({order}) => {
+const OrderItem: FC<Props> = ({order, onChangeStatus}) => {
     const [opened, setOpened] = useState(false);
 
     function toggleOpened() {
         setOpened(prevState => !prevState);
     }
 
-    const changeStatus = (status: RepairOrderListType['status']) => {
-
+    const {handle} = useRepairOrderEditStatus(order.id);
+    const changeStatus = async (status: RepairOrderListType['status']) => {
+        const response = await handle(status);
+        if (response) {
+            onChangeStatus(order.id, status);
+        }
     };
 
     const totalPrice = useMemo(() => {
@@ -63,7 +69,7 @@ const OrderItem: FC<Props> = ({order}) => {
 
                 <RepairActions>
                     <StatusSelect
-                        value={order.status}
+                        defaultValue={order.status}
                         onChange={e =>
                             changeStatus(e.target.value as RepairOrderListType['status'])
                         }

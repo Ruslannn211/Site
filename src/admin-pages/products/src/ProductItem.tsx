@@ -28,7 +28,7 @@ const ProductItem: FC<Props> = (props) => {
                     <ProductStats>
                         <ProductStat>
                             <Star size={14} />
-                            {/*{product.rating} ({product.reviews})*/}
+                            {product.rating}
                         </ProductStat>
                         <ProductStat>
                             <ShoppingCart size={14} />

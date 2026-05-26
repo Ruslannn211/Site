@@ -21,7 +21,7 @@ const useRepairsOrdersList = () => {
         handle();
     }, []);
 
-    return {list, loading};
+    return {list, loading, setList};
 };
 
 export default useRepairsOrdersList;

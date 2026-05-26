@@ -9,13 +9,17 @@ import StatCardAdmin from "@components/ui/StatCardAdmin.tsx";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
 
 const RepairsPage: FC = () => {
-    const {list: orders} = useRepairsOrdersList();
+    const {list: orders, setList: setOrders} = useRepairsOrdersList();
 
     const totalPrice = useMemo(() => {
         return orders.reduce((acc, order) => (
             acc + (order.price_list.reduce((acc, price) => acc + price.price, 0))
         ), 0);
     }, [orders]);
+
+    const changeStatus = (id: number, status: any) => {
+        setOrders(prev => prev.map(o => o.id === id ? ({...o, status}) : o));
+    }
 
     return (
         <Container>
@@ -54,7 +58,7 @@ const RepairsPage: FC = () => {
 
             <RepairsList>
                 {orders.map(order => (
-                    <OrderItem key={order.id} order={order} />
+                    <OrderItem key={order.id} order={order} onChangeStatus={changeStatus} />
                 ))}
             </RepairsList>
         </Container>

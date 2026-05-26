@@ -23,8 +23,20 @@ export type ProductListType = {
     guarantee: number;
     badge: "promotion" | "top" | "new" | null;
     previewImage: string | null;
+    rating: number;
     orders: number
     createdAt: string;
+}
+
+export interface ProductRatingType {
+    id: number;
+    rating: number;
+    comment: string | null;
+    userId: number;
+    productId: number;
+    updatedAt: string;
+    createdAt: string;
+    user: UserType;
 }
 
 export type RepairPriceType = {
@@ -55,6 +67,7 @@ export type ProductType = {
     guarantee: number;
     badge: "promotion" | "top" | "new" | null;
     images: string[];
+    ratings: ProductRatingType[];
     features: ProductFeatureType[];
     createdAt: string;
 }

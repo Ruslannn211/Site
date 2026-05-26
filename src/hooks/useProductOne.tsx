@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type {ProductType} from "@types-lib";
+import type {ProductRatingType, ProductType} from "@types-lib";
 import api from "@api";
 
 const useProductOne = (productId?: number | null) => {
@@ -18,12 +18,17 @@ const useProductOne = (productId?: number | null) => {
         }
     }
 
+    function addRating(rating: ProductRatingType) {
+        if (!product) return;
+        setProduct(({...product, ratings: [...product.ratings, rating]}));
+    }
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         handle();
     }, [productId]);
 
-    return {product, loading};
+    return {product, loading, addRating};
 };
 
 export default useProductOne;

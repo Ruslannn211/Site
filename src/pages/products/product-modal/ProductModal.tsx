@@ -5,7 +5,6 @@ import {
     Heart,
     ShieldCheck,
     ShoppingCart,
-    Star,
     Truck,
 } from "lucide-react";
 import useProductOpen from "@pages/products/product-modal/hooks/useProductOpen.tsx";
@@ -23,7 +22,7 @@ const ProductPage: FC = () => {
     const params = useProductOpen();
     const navigate = useNavigate();
 
-    const {product} = useProductOne(params.product);
+    const {product, addRating} = useProductOne(params.product);
 
     const cart = useCart();
     const inCart = product ? cart.isInCart(product.id) : false;
@@ -78,26 +77,6 @@ const ProductPage: FC = () => {
                             </StatusRow>
 
                             <Title>{product.name}</Title>
-
-                            {/*<RatingRow>
-                                <Stars>
-                                    <StarFill />
-                                    <StarFill />
-                                    <StarFill />
-                                    <StarFill />
-                                    <StarFill />
-                                </Stars>
-
-                                <RatingValue>
-                                    4.9
-                                </RatingValue>
-
-                                <Reviews>
-                                    <MessageCircle size={13} />
-
-                                    284 відгуки
-                                </Reviews>
-                            </RatingRow>*/}
 
                             <PriceSection>
                                 {(product.discount ?? 0) > 0 && (
@@ -173,7 +152,9 @@ const ProductPage: FC = () => {
                         </Right>
                     </Grid>
                 )}
-                <ReviewsComponent />
+                {product && (
+                    <ReviewsComponent product={product} addRating={addRating} />
+                )}
             </Content>
         </Container>
     );
@@ -401,46 +382,6 @@ const Title = styled.div`
     letter-spacing: -0.05em;
 
     color: #0f172a;
-`;
-
-const RatingRow = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    margin-top: 5px;
-`;
-
-const Stars = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 4px;
-`;
-
-const StarFill = styled(Star)`
-    width: 16px;
-    height: 16px;
-
-    fill: #f59e0b;
-    color: #f59e0b;
-`;
-
-const RatingValue = styled.div`
-    font-size: 13px;
-    font-weight: 800;
-
-    color: #0f172a;
-`;
-
-const Reviews = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
-    font-size: 13px;
-    font-weight: 600;
-
-    color: #64748b;
 `;
 
 const PriceSection = styled.div`
