@@ -4,10 +4,10 @@ import { getAccessToken, ensureFreshToken } from '@tokens';
    Конфиг окружения
 ============================================================ */
 
-export const BASE_URL = import.meta.env.DEV
+/*export const BASE_URL = import.meta.env.DEV
     ? 'http://localhost:4081'
-    : '/api';
-//export const BASE_URL = '/api';
+    : '/api';*/
+export const BASE_URL = '/api';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

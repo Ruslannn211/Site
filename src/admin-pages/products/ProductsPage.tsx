@@ -1,14 +1,12 @@
 import {type FC, useMemo, useState} from "react";
 import styled from "styled-components";
 import {
-    CheckCircle2,
-    Clock3,
     Package,
     Plus,
     Search,
     ShoppingCart,
     Star,
-    TrendingUp, Truck,
+    TrendingUp
 } from "lucide-react";
 import ProductModal from "@admin-pages/products/product-modal/ProductModal.tsx";
 import useProductsList from "@hooks/useProductsList.tsx";
@@ -17,10 +15,10 @@ import StatCardAdmin from "@components/ui/StatCardAdmin.tsx";
 import {buildNumberFormat} from "@helpers/buildNumberFormat.ts";
 
 const ProductsPage: FC = () => {
-    const [productOpen, setProductOpen] = useState(false);
+    const [createModal, setCreateModal] = useState(false);
     const [search, setSearch] = useState("");
 
-    const {list: products} = useProductsList();
+    const {list: products, addProduct} = useProductsList();
 
     const totalOrders = useMemo(() => {
         return products.reduce(
@@ -38,7 +36,7 @@ const ProductsPage: FC = () => {
         return (
             products.reduce(
                 (acc, product) =>
-                    acc + product.rating,
+                    acc + (product.rating ?? 0),
                 0
             ) / products.length
         );
@@ -81,7 +79,7 @@ const ProductsPage: FC = () => {
                             placeholder={"Пошук товарів..."}
                         />
                     </SearchBlock>
-                    <AddButton>
+                    <AddButton onClick={() => setCreateModal(true)}>
                         <Plus size={18} />
                         Додати товар
                     </AddButton>
@@ -91,16 +89,16 @@ const ProductsPage: FC = () => {
             <StatsGrid>
                 <StatCardAdmin icon={<Package size={18} />} label={"Всього товарів"} value={buildNumberFormat(products.length)} />
                 <StatCardAdmin icon={<ShoppingCart size={18} />} label={"Замовлень"} value={buildNumberFormat(totalOrders)} />
-                <StatCardAdmin icon={<TrendingUp size={18} />} label={"Конверсія"} value={`${conversion}%`} />
-                <StatCardAdmin icon={<Star size={18} />} label={"Середній рейтинг"} value={`${averageRating}`} />
+                <StatCardAdmin icon={<TrendingUp size={18} />} label={"Конверсія"} value={`${buildNumberFormat(conversion, {fractionDigits: 2})}%`} />
+                <StatCardAdmin icon={<Star size={18} />} label={"Середній рейтинг"} value={`${buildNumberFormat(averageRating, {fractionDigits: 1})}`} />
             </StatsGrid>
 
             <ProductsList>
                 {products.map(product => (
-                    <ProductItem key={product.id} product={product} openProduct={() => setProductOpen(true)} />
+                    <ProductItem key={product.id} product={product} openProduct={() => {}} />
                 ))}
             </ProductsList>
-            <ProductModal open={productOpen} onClose={() => setProductOpen(false)} />
+            <ProductModal open={createModal} onClose={() => setCreateModal(false)} addProduct={addProduct} />
         </Container>
     );
 };
@@ -222,70 +220,6 @@ const StatsGrid = styled.div`
     grid-template-columns: repeat(4, 1fr);
 
     gap: 16px;
-`;
-
-const StatCard = styled.div`
-    min-height: 110px;
-
-    padding: 18px;
-
-    border-radius: 20px;
-
-    background: white;
-
-    border: 1px solid #e2e8f0;
-
-    display: flex;
-    align-items: center;
-    gap: 16px;
-
-    box-shadow:
-            0 10px 24px rgba(15,23,42,0.04);
-
-    box-sizing: border-box;
-`;
-
-const StatIcon = styled.div`
-    width: 52px;
-    height: 52px;
-
-    border-radius: 16px;
-
-    background:
-            linear-gradient(
-                    135deg,
-                    #16a34a 0%,
-                    #22c55e 100%
-            );
-
-    color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
-
-const StatInfo = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-const StatValue = styled.div`
-    font-size: 28px;
-    font-weight: 900;
-
-    letter-spacing: -0.05em;
-
-    color: #0f172a;
-`;
-
-const StatLabel = styled.div`
-    margin-top: 4px;
-
-    font-size: 13px;
-    font-weight: 600;
-
-    color: #64748b;
 `;
 
 const ProductsList = styled.div`

@@ -51,20 +51,6 @@ const ProductPage: FC = () => {
                         <ArrowLeft size={16} />
                         Назад
                     </BackButton>
-
-                    <Tabs>
-                        <Tab active>
-                            Про товар
-                        </Tab>
-
-                        <Tab>
-                            Характеристики
-                        </Tab>
-
-                        <Tab>
-                            Відгуки та питання
-                        </Tab>
-                    </Tabs>
                 </TopTabs>
 
                 {product && (
@@ -239,77 +225,6 @@ const BackButton = styled.button`
 
         box-shadow:
                 0 8px 16px rgba(15,23,42,0.06);
-    }
-`;
-
-const Tabs = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
-    flex-wrap: wrap;
-`;
-
-const Tab = styled.button<{ active?: boolean }>`
-    position: relative;
-
-    height: 36px;
-
-    padding: 0 16px;
-
-    border: none;
-    border-radius: 12px;
-
-    background: ${({ active }) =>
-    active
-        ? "rgba(34,197,94,0.10)"
-        : "transparent"};
-
-    color: ${({ active }) =>
-    active
-        ? "#16a34a"
-        : "#0f172a"};
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 14px;
-    font-weight: ${({ active }) =>
-    active ? 800 : 700};
-
-    white-space: nowrap;
-
-    cursor: pointer;
-
-    transition: 0.16s ease;
-
-    &:hover {
-        background: ${({ active }) =>
-    active
-        ? "rgba(34,197,94,0.10)"
-        : "#f8fafc"};
-    }
-
-    &::after {
-        content: "";
-
-        position: absolute;
-
-        left: 14px;
-        right: 14px;
-        bottom: 6px;
-
-        height: 2px;
-
-        border-radius: 999px;
-
-        background: ${({ active }) =>
-    active
-        ? "#22c55e"
-        : "transparent"};
-
-        transition: 0.16s ease;
     }
 `;
 

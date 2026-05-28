@@ -26,12 +26,16 @@ const useProductsList = (filters?: ProductsFiltersType) => {
         }
     }
 
+    function addProduct(product: ProductListType) {
+        setList(prev => [product, ...prev]);
+    }
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         handle();
     }, [filters]);
 
-    return {list, loading};
+    return {list, loading, addProduct};
 };
 
 export default useProductsList;

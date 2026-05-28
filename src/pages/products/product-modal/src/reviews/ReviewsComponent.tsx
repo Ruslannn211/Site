@@ -5,6 +5,7 @@ import type {ProductRatingType, ProductType} from "@types-lib";
 import {buildClientName} from "@helpers/buildClientName.ts";
 import {useStore} from "@store";
 import ReviewCreateModal from "@pages/products/product-modal/src/reviews/ReviewCreateModal.tsx";
+import {buildFormatDateTime} from "@helpers/buildFormatDateTime.ts";
 
 interface Props {
     product: ProductType;
@@ -17,7 +18,8 @@ const ReviewsComponent: FC<Props> = (props) => {
     const {user} = useStore(store => store.global.user);
     const [open, setOpen] = useState(false);
 
-    const average = product.ratings.reduce((acc, review) => acc + review.rating, 0) / product.ratings.length;
+    const averageNum = product.ratings.reduce((acc, review) => acc + review.rating, 0);
+    const average = averageNum === 0 ? 0 : (averageNum / product.ratings.length);
     const stars = [5, 4, 3, 2, 1];
 
     return (
@@ -44,7 +46,7 @@ const ReviewsComponent: FC<Props> = (props) => {
                         <RatingList>
                             {stars.map(star => {
                                 const count = product.ratings.filter(review => review.rating === star).length;
-                                const percent = (count / product.ratings.length) * 100;
+                                const percent = count === 0 ? 0 : (count / product.ratings.length) * 100;
 
                                 return (
                                     <RatingRow key={star}>
@@ -74,6 +76,9 @@ const ReviewsComponent: FC<Props> = (props) => {
                     </RightTop>
 
                     <ReviewsList>
+                        {product.ratings.length === 0 && (
+                            <EmptyReviews />
+                        )}
                         {product.ratings.map(review => (
                             <ReviewCard key={review.id}>
                                 <ReviewTop>
@@ -84,7 +89,7 @@ const ReviewsComponent: FC<Props> = (props) => {
 
                                         <UserInfo>
                                             <UserName>{buildClientName(review.user)}</UserName>
-                                            <ReviewDate>{review.createdAt}</ReviewDate>
+                                            <ReviewDate>{buildFormatDateTime(review.createdAt)}</ReviewDate>
                                         </UserInfo>
                                     </ReviewUser>
 
@@ -114,6 +119,94 @@ const ReviewsComponent: FC<Props> = (props) => {
 };
 
 export default ReviewsComponent;
+
+const EmptyReviews = () => {
+    return (
+        <EmptyWrapper>
+            <EmptyIcon>
+                <Star size={34}/>
+            </EmptyIcon>
+
+            <EmptyTitle>
+                Відгуків поки немає
+            </EmptyTitle>
+
+            <EmptyText>
+                Станьте першим покупцем, який поділиться своїм враженням про цей товар.
+            </EmptyText>
+        </EmptyWrapper>
+    );
+};
+
+const EmptyWrapper = styled.div`
+    width: 100%;
+
+    padding: 42px 28px;
+
+    border-radius: 22px;
+
+    background: linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #f8fafc 100%
+    );
+
+    border: 1px solid #e2e8f0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    box-sizing: border-box;
+`;
+
+const EmptyIcon = styled.div`
+    width: 78px;
+    height: 78px;
+
+    border-radius: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(
+            135deg,
+            rgba(250, 204, 21, 0.16) 0%,
+            rgba(245, 158, 11, 0.1) 100%
+    );
+
+    color: #f59e0b;
+
+    box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.7),
+            0 10px 30px rgba(245, 158, 11, 0.12);
+`;
+
+const EmptyTitle = styled.div`
+    margin-top: 22px;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    letter-spacing: -0.04em;
+
+    color: #0f172a;
+`;
+
+const EmptyText = styled.div`
+    max-width: 420px;
+
+    margin-top: 12px;
+
+    font-size: 14px;
+    line-height: 1.7;
+
+    color: #64748b;
+`;
 
 const Container = styled.div`
     position: relative;

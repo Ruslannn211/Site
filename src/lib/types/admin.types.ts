@@ -48,3 +48,18 @@ export type RepairOrderListType = {
     createdAt: string;
     price_list: RepairOrderPriceType[];
 }
+
+export interface UserListType {
+    id: number;
+    first_name: string;
+    last_name: string | null;
+    patronymic: string | null;
+    email: string | null;
+    phone_number: string | null;
+    isAdmin: boolean;
+    updatedAt: string;
+    createdAt: string;
+    ordersCount: number;
+    repairsOrdersCount: number;
+    totalSpent: number;
+}

@@ -2,7 +2,6 @@ import {type FC} from "react";
 import styled from "styled-components";
 import {
     Heart,
-    MessageCircle,
     ShoppingCart,
     Star,
 } from "lucide-react";
@@ -301,17 +300,6 @@ const RatingValue = styled.div`
     font-weight: 700;
 
     color: #0f172a;
-`;
-
-const Reviews = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 4px;
-
-    font-size: 12px;
-    font-weight: 600;
-
-    color: #64748b;
 `;
 
 const PriceBlock = styled.div`
